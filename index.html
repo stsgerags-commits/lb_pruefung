@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#2E86C1">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="LB Prüfung">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Bewertung Praktische Prüfung – Standardisiertes Leistungsbild Thüringen</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #f5f5f5; color: #1a1a1a; }
+
+.app-shell { max-width: 820px; margin: 0 auto; padding: 24px 16px 60px; }
+
+.app-header { margin-bottom: 20px; }
+.app-header h1 { font-size: 22px; font-weight: 600; }
+.app-header p { font-size: 13px; color: #666; margin-top: 4px; }
+.progress-bar { height: 4px; background: #e0e0e0; border-radius: 2px; margin-top: 10px; overflow: hidden; }
+.progress-fill { height: 100%; background: #2E86C1; border-radius: 2px; transition: width 0.3s; }
+
+.tabs { display: flex; gap: 6px; margin-bottom: 20px; }
+.tab { flex: 1; padding: 10px; border-radius: 8px; font-size: 14px; cursor: pointer; text-align: center; background: #fff; color: #555; border: 1px solid #ddd; }
+.tab:hover { background: #eef5fb; }
+.tab.active { background: #2E86C1; color: #fff; border-color: #2E86C1; font-weight: 500; }
+
+.view { display: none; }
+.view.active { display: block; }
+
+.meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.meta-field label { display: block; font-size: 11px; color: #666; margin-bottom: 4px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+.meta-field input { width: 100%; padding: 9px 12px; font-size: 14px; border: 1px solid #ddd; border-radius: 8px; background: #fff; font-family: inherit; line-height: 1.3; height: 38px; }
+.meta-field input[type="date"] { -webkit-appearance: none; appearance: none; min-width: 0; }
+.meta-field input[type="date"]::-webkit-date-and-time-value { text-align: left; margin: 0; font-size: 14px; }
+.meta-field input[type="date"]::-webkit-calendar-picker-indicator { margin-left: auto; opacity: 0.55; cursor: pointer; }
+.meta-field input:focus { outline: none; border-color: #2E86C1; box-shadow: 0 0 0 3px rgba(46,134,193,0.12); }
+
+.section { margin-bottom: 16px; background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; }
+.section-header { padding: 11px 16px; background: #f8f8f8; border-bottom: 1px solid #e0e0e0; display: flex; align-items: center; gap: 10px; }
+.section-title { font-size: 13px; font-weight: 600; color: #333; text-transform: uppercase; letter-spacing: 0.06em; }
+.section-badge { font-size: 12px; padding: 2px 10px; border-radius: 20px; background: #e8f2fa; color: #1F618D; font-weight: 500; margin-left: auto; }
+.group-label { padding: 7px 16px; background: #fbfcfd; border-bottom: 1px solid #f0f0f0; font-size: 11px; color: #7a8a99; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+
+.criterion { border-bottom: 1px solid #f0f0f0; padding: 16px; }
+.criterion:last-child { border-bottom: none; }
+.criterion-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.criterion-desc { font-size: 12px; color: #888; margin-bottom: 12px; }
+
+.scale { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; }
+.scale-btn { border: 1px solid #ddd; border-radius: 8px; padding: 9px 4px; cursor: pointer; text-align: center; background: #fff; transition: all 0.15s; }
+.scale-btn:hover { border-color: #aaa; background: #f8f8f8; }
+.scale-note { font-size: 11px; font-weight: 600; color: #555; }
+.scale-word { font-size: 9px; color: #999; margin-top: 2px; }
+.pts-badge { display: inline-block; font-size: 9px; font-weight: 600; color: #888; background: #f0f0f0; border: 1px solid #ddd; border-radius: 10px; padding: 1px 5px; margin-bottom: 3px; }
+
+.scale-btn.sel-1 { background: #E8F4E8; border-color: #2D6A2D; } .scale-btn.sel-1 .scale-note { color: #2D6A2D; }
+.scale-btn.sel-2 { background: #E6F1FB; border-color: #185FA5; } .scale-btn.sel-2 .scale-note { color: #185FA5; }
+.scale-btn.sel-3 { background: #EAF3DE; border-color: #3B6D11; } .scale-btn.sel-3 .scale-note { color: #3B6D11; }
+.scale-btn.sel-4 { background: #FAEEDA; border-color: #854F0B; } .scale-btn.sel-4 .scale-note { color: #854F0B; }
+.scale-btn.sel-5 { background: #FCEBEB; border-color: #A32D2D; } .scale-btn.sel-5 .scale-note { color: #A32D2D; }
+.scale-btn.sel-6 { background: #F7C1C1; border-color: #501313; } .scale-btn.sel-6 .scale-note { color: #501313; }
+
+.ptrow { display: none; margin-top: 10px; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ptrow.shown { display: flex; }
+.ptrow-label { font-size: 11px; color: #666; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+.pt-btn { border: 1px solid #ccc; background: #fff; border-radius: 6px; padding: 5px 12px; font-size: 13px; font-weight: 600; color: #555; cursor: pointer; }
+.pt-btn:hover { background: #f2f2f2; }
+.pt-btn.active { background: #2E86C1; border-color: #2E86C1; color: #fff; }
+.ptrow-hint { font-size: 11px; color: #999; }
+
+.preview-text { font-size: 12px; color: #1F618D; margin-top: 10px; padding: 7px 10px; background: #eef5fb; border-radius: 6px; border-left: 3px solid #2E86C1; font-style: italic; display: none; line-height: 1.5; }
+.preview-text.shown { display: block; }
+
+.btn-primary { width: 100%; padding: 13px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; background: #2E86C1; color: #fff; border: none; margin-top: 8px; }
+.btn-primary:hover { background: #216FA3; }
+.btn-export { background: #1A6B1A; }
+.btn-export:hover { background: #124e12; }
+.btn-export:disabled { background: #bbb; cursor: not-allowed; }
+
+.panel { background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+.panel-title { font-size: 12px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
+
+.weight-grid { display: grid; grid-template-columns: repeat(3, 1fr) auto; gap: 10px; align-items: end; }
+.weight-field label { display: block; font-size: 11px; color: #666; margin-bottom: 4px; font-weight: 500; }
+.weight-field input { width: 100%; padding: 8px 10px; font-size: 14px; border: 1px solid #ddd; border-radius: 8px; }
+.btn-small { padding: 8px 12px; font-size: 12px; border: 1px solid #ccc; background: #fff; border-radius: 8px; cursor: pointer; white-space: nowrap; }
+.btn-small:hover { background: #f2f2f2; }
+.weight-sum { font-size: 12px; margin-top: 10px; }
+.weight-sum.ok { color: #2D6A2D; }
+.weight-sum.bad { color: #A32D2D; font-weight: 600; }
+.weight-note { font-size: 11px; color: #999; margin-top: 8px; line-height: 1.5; }
+
+.gate { background: #FFF8E6; border: 1px solid #E3C36B; border-radius: 12px; padding: 16px; margin-bottom: 16px; font-size: 13px; line-height: 1.6; }
+.gate strong { color: #7A5B00; }
+.gate ul { margin: 8px 0 0 18px; color: #6b5a2a; font-size: 12px; }
+
+.score-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+.score-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; padding: 14px; text-align: center; }
+.score-card-label { font-size: 11px; color: #888; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+.score-card-value { font-size: 26px; font-weight: 600; }
+.score-card-sub { font-size: 11px; color: #888; margin-top: 4px; }
+
+.bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.bar-row:last-child { margin-bottom: 0; }
+.bar-label { font-size: 13px; color: #555; width: 150px; flex-shrink: 0; }
+.bar-track { flex: 1; height: 10px; background: #f0f0f0; border-radius: 5px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 5px; transition: width 0.5s ease; }
+.bar-pts { font-size: 12px; color: #666; width: 52px; text-align: right; flex-shrink: 0; }
+
+.note-display { text-align: center; padding: 20px; border-radius: 12px; margin-bottom: 16px; border: 2px solid #ddd; }
+.note-kicker { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #777; margin-bottom: 6px; font-weight: 600; }
+.note-number { font-size: 44px; font-weight: 700; line-height: 1.1; }
+.note-word { font-size: 18px; font-weight: 500; margin-top: 2px; }
+.note-range { font-size: 13px; color: #777; margin-top: 6px; }
+.note-detail { font-size: 12px; margin-top: 8px; }
+
+.setnote-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.setnote-grid label { display: block; font-size: 11px; color: #666; margin-bottom: 4px; font-weight: 500; }
+.setnote-grid select { width: 100%; padding: 9px 10px; font-size: 14px; border: 1px solid #ddd; border-radius: 8px; background: #fff; }
+.deviation { font-size: 12px; margin-top: 10px; padding: 8px 10px; border-radius: 6px; display: none; }
+.deviation.shown { display: block; background: #FFF8E6; border: 1px solid #E3C36B; color: #7A5B00; }
+.deviation textarea { width: 100%; margin-top: 6px; padding: 8px; font-size: 12px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; min-height: 60px; resize: vertical; }
+
+.wt-modes { display: flex; gap: 6px; margin-bottom: 12px; }
+.wt-mode { flex: 1; padding: 7px; font-size: 12px; border: 1px solid #ddd; border-radius: 7px; background: #fff; color: #555; cursor: pointer; text-align: center; }
+.wt-mode.active { background: #2E86C1; color: #fff; border-color: #2E86C1; }
+.worturteil-text { font-size: 14px; line-height: 1.85; white-space: pre-wrap; }
+.worturteil-edit { width: 100%; margin-top: 12px; padding: 10px; font-size: 13px; border: 1px solid #ddd; border-radius: 8px; resize: vertical; min-height: 240px; font-family: inherit; line-height: 1.8; }
+.toggle-edit { font-size: 12px; color: #2E86C1; cursor: pointer; text-decoration: underline; margin-top: 10px; display: inline-block; }
+
+.legal { font-size: 11px; color: #8a8a8a; line-height: 1.6; margin-top: 6px; }
+
+.reflexion-freitext { padding: 14px 16px; border-bottom: 1px solid #f0f0f0; background: #fbfcfd; }
+.reflexion-freitext label { display: block; font-size: 11px; color: #666; margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+.reflexion-freitext textarea { width: 100%; min-height: 100px; padding: 10px; font-size: 13px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; resize: vertical; line-height: 1.5; }
+
+.phase-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+.phase-row input[type="text"] { flex: 1; min-width: 120px; padding: 8px 10px; font-size: 13px; border: 1px solid #ddd; border-radius: 8px; }
+.phase-row input[type="number"] { width: 70px; padding: 8px 10px; font-size: 13px; border: 1px solid #ddd; border-radius: 8px; }
+.phase-row .unit { font-size: 12px; color: #888; }
+
+.live-clock { font-size: 42px; font-weight: 700; text-align: center; margin-bottom: 4px; transition: color 0.2s; }
+.live-clock.overrun { color: #A32D2D; animation: pulseWarn 1.4s infinite; }
+@keyframes pulseWarn { 0%,100% { opacity: 1; } 50% { opacity: 0.55; } }
+.live-status { text-align: center; font-size: 13px; color: #666; margin-bottom: 14px; }
+.live-status.overrun { color: #A32D2D; font-weight: 600; }
+
+.phase-btn { width: 100%; text-align: left; padding: 12px 14px; font-size: 14px; border: 1px solid #ddd; background: #fff; border-radius: 8px; cursor: pointer; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+.phase-btn:hover { background: #f8f8f8; }
+.phase-btn.running { background: #2E86C1; border-color: #2E86C1; color: #fff; }
+.phase-btn .planned { font-size: 12px; opacity: 0.75; }
+
+.note-input-row { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.note-input-row input { flex: 1; min-width: 140px; padding: 9px 12px; font-size: 14px; border: 1px solid #ddd; border-radius: 8px; }
+
+.protocol-log { font-size: 13px; line-height: 1.7; max-height: 320px; overflow-y: auto; }
+.protocol-entry { padding: 6px 0; border-bottom: 1px solid #f0f0f0; }
+.protocol-entry .ts { color: #999; margin-right: 6px; }
+.protocol-empty { color: #999; }
+
+.import-drop { border: 2px dashed #cbd8e3; border-radius: 10px; padding: 18px; text-align: center; font-size: 13px; color: #6b7f92; cursor: pointer; background: #fbfcfd; }
+.import-drop:hover, .import-drop.dragover { border-color: #2E86C1; background: #eef5fb; color: #1F618D; }
+.import-status { font-size: 12px; margin-top: 10px; padding: 8px 10px; border-radius: 6px; display: none; line-height: 1.5; }
+.import-status.shown { display: block; }
+.import-status.ok { background: #E8F4E8; border: 1px solid #A8CDA8; color: #2D6A2D; }
+.import-status.err { background: #FCEBEB; border: 1px solid #E0A8A8; color: #A32D2D; }
+
+.exp-item { border-bottom: 1px solid #f0f0f0; padding: 12px 0; }
+.exp-item:last-child { border-bottom: none; }
+.exp-head { display: flex; gap: 8px; align-items: flex-start; }
+.exp-kind { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 2px 8px; border-radius: 10px; white-space: nowrap; margin-top: 2px; }
+.exp-kind.staerke { background: #E8F4E8; color: #2D6A2D; }
+.exp-kind.irritation { background: #FAEEDA; color: #854F0B; }
+.exp-text { font-size: 13px; line-height: 1.5; flex: 1; }
+.exp-beleg { font-size: 11px; color: #888; margin-top: 4px; font-style: italic; }
+.exp-actions { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+.exp-btn { border: 1px solid #ccc; background: #fff; border-radius: 6px; padding: 4px 12px; font-size: 12px; color: #555; cursor: pointer; }
+.exp-btn:hover { background: #f2f2f2; }
+.exp-btn.on-conf { background: #2D6A2D; border-color: #2D6A2D; color: #fff; }
+.exp-btn.on-wid { background: #A32D2D; border-color: #A32D2D; color: #fff; }
+.exp-note { width: 100%; margin-top: 6px; padding: 7px 9px; font-size: 12px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; resize: vertical; min-height: 44px; }
+
+.q-item { border-bottom: 1px solid #f0f0f0; padding: 12px 0; }
+.q-item:last-child { border-bottom: none; }
+.q-top { display: flex; gap: 10px; align-items: flex-start; }
+.q-top input[type="checkbox"] { margin-top: 3px; width: 16px; height: 16px; flex-shrink: 0; }
+.q-text { font-size: 13px; line-height: 1.5; }
+.q-meta { font-size: 11px; color: #888; margin-top: 4px; }
+.q-note { width: 100%; margin-top: 6px; padding: 7px 9px; font-size: 12px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; resize: vertical; min-height: 44px; }
+
+.phase-impuls { font-size: 11px; color: #7a8a99; margin: -4px 0 10px 2px; line-height: 1.5; }
+
+@media (max-width: 560px) {
+  .scale { grid-template-columns: repeat(3, 1fr); }
+  .meta-grid, .score-grid, .setnote-grid { grid-template-columns: 1fr; }
+  .weight-grid { grid-template-columns: 1fr 1fr; }
+  .bar-label { width: 110px; font-size: 12px; }
+}
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+  <div class="app-header">
+    <h1>Bewertung Praktische Prüfung</h1>
+    <p>Standardisiertes Leistungsbild zur praktischen Prüfung · Landesprüfungsamt für Lehrämter Thüringen · Stand 13.12.13 · Nutzungshinweise Stand 01.08.2016</p>
+    <div style="display:flex;align-items:center;gap:12px;margin-top:8px;flex-wrap:wrap;">
+      <span id="saveStatus" style="font-size:11px;color:#7a8a99;">Arbeitsstand wird lokal in diesem Browser gespeichert.</span>
+      <button class="btn-small" style="margin-left:auto;" onclick="resetAll()">Neue Prüfung</button>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressBar" style="width:0%"></div></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="showView('bewertung')">Bewertung</div>
+    <div class="tab" onclick="showView('live')">Live-Beobachtung</div>
+    <div class="tab" onclick="showView('ergebnis')">Ergebnis &amp; Worturteil</div>
+  </div>
+
+  <div class="view active" id="view-bewertung">
+    <div class="meta-grid">
+      <div class="meta-field"><label>Name LAA</label><input type="text" id="laaName" placeholder="Vorname Nachname" /></div>
+      <div class="meta-field"><label>Fach / Thema</label><input type="text" id="fachThema" placeholder="z. B. Mathematik – Verdoppeln" /></div>
+      <div class="meta-field"><label>Klasse</label><input type="text" id="klasse" placeholder="z. B. Jahrgang 2, jahrgangsmischend" /></div>
+      <div class="meta-field"><label>Datum</label><input type="date" id="datum" /></div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><span class="section-title">Anforderung: Planung</span><span class="section-badge" id="badge-planung">nicht bewertet</span></div>
+      <div id="criteria-planung"></div>
+    </div>
+    <div class="section">
+      <div class="section-header"><span class="section-title">Anforderung: Durchführung</span><span class="section-badge" id="badge-durchfuehrung">nicht bewertet</span></div>
+      <div id="criteria-durchfuehrung"></div>
+    </div>
+    <div class="section">
+      <div class="section-header"><span class="section-title">Anforderung: Reflexion</span><span class="section-badge" id="badge-reflexion">nicht bewertet</span></div>
+      <div class="reflexion-freitext">
+        <label>Aussagen der LAA im Prüfungsgespräch (Freitext)</label>
+        <textarea id="reflexionFreitext" placeholder="Wörtliche oder sinngemäße Aussagen der LAA während der Reflexion — als Abgleich zur eigenen Beobachtung, wird im PDF-Export unter Reflexion mit ausgegeben."></textarea>
+      </div>
+      <div id="criteria-reflexion"></div>
+    </div>
+
+    <button class="btn-primary" onclick="showView('ergebnis')">Zum Ergebnis →</button>
+  </div>
+
+  <div class="view" id="view-live">
+
+    <div class="panel">
+      <div class="panel-title">Entwurfsanalyse importieren (JSON)</div>
+      <div class="import-drop" id="importDrop" onclick="document.getElementById('importFile').click()">
+        JSON-Datei hierher ziehen oder klicken zum Auswählen
+      </div>
+      <input type="file" id="importFile" accept=".json,application/json" style="display:none" onchange="handleImportFile(this.files[0])">
+      <div class="import-status" id="importStatus"></div>
+      <div class="weight-note">Der Import füllt Kopfdaten, Phasenplanung mit Beobachtungsimpulsen, den Erwartungsabgleich und die Nachgesprächsfragen. Bewertungen werden bewusst nicht vorbelegt.</div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Phasenplanung (aus dem Verlaufsplan des Entwurfs)</div>
+      <div id="phaseEditor"></div>
+      <button class="btn-small" onclick="addPhase()">+ Phase hinzufügen</button>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Live-Timer</div>
+      <div class="live-clock" id="liveClock">00:00</div>
+      <div class="live-status" id="liveStatus">Keine Phase gestartet.</div>
+      <div id="phaseButtons"></div>
+      <button class="btn-small" onclick="stopPhase()">Timer stoppen</button>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Protokoll</div>
+      <div class="note-input-row">
+        <input type="text" id="quickNote" placeholder="Kurznotiz zur aktuellen Phase…" onkeydown="if(event.key==='Enter')addNote()">
+        <button class="btn-small" onclick="addNote()">Notiz erfassen</button>
+      </div>
+      <div class="protocol-log" id="protocolLog"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Erwartungen aus dem Entwurf — Abgleich</div>
+      <div id="expList"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Verständnisfragen Nachgespräch</div>
+      <div id="qList"></div>
+    </div>
+
+  </div>
+
+  <div class="view" id="view-ergebnis">
+
+    <div class="panel">
+      <div class="panel-title">Gewichtung der Anforderungsbereiche</div>
+      <div class="weight-grid">
+        <div class="weight-field"><label>Planung %</label><input type="number" id="wP" value="20" min="0" max="100" step="1" oninput="buildErgebnis()"></div>
+        <div class="weight-field"><label>Durchführung %</label><input type="number" id="wD" value="50" min="0" max="100" step="1" oninput="buildErgebnis()"></div>
+        <div class="weight-field"><label>Reflexion %</label><input type="number" id="wR" value="30" min="0" max="100" step="1" oninput="buildErgebnis()"></div>
+        <button class="btn-small" onclick="resetWeights()">Zurücksetzen</button>
+      </div>
+      <div class="weight-sum" id="weightSum"></div>
+      <div class="weight-note">Die Gewichtung ist pro Prüfung veränderbar. Nutzungshinweise zu den Standardisierten Leistungsbildern, Nr. 1: „Der prüfungsspezifische Beurteilungsspielraum erstreckt sich insbesondere auf die Gewichtung einzelner Indikatoren.“ Die Voreinstellung 20 / 50 / 30 ist eine Festlegung des Studienseminars, keine Vorgabe des Landesprüfungsamts.</div>
+    </div>
+
+    <div id="gateBox"></div>
+    <div id="resultBox" style="display:none">
+
+      <div class="score-grid" id="scoreGrid"></div>
+      <div class="panel" id="barContainer"></div>
+      <div class="note-display" id="noteDisplay"></div>
+
+      <div class="panel">
+        <div class="panel-title">Festsetzung der Note</div>
+        <div class="setnote-grid">
+          <div><label>Note</label><select id="setNote" onchange="onSetNoteChange()"></select></div>
+          <div><label>Punktwert</label><select id="setPts" onchange="renderWorturteil()"></select></div>
+        </div>
+        <div class="deviation" id="deviationBox">
+          <strong>Abweichung vom rechnerischen Vorschlag.</strong> Bitte begründen – die Begründung wird in den Export übernommen.
+          <textarea id="deviationText" placeholder="Begründung der Abweichung" oninput="renderWorturteil()"></textarea>
+        </div>
+        <div class="legal">Die Note der Prüfungslehrprobe wird nach § 24 Abs. 6 ThürAZStPLVO vom Prüfungsausschuss festgesetzt. Der rechnerische Wert dieser Anwendung ist ein Vorschlag zur Vorbereitung dieser Entscheidung und bindet den Ausschuss nicht.</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Worturteil</div>
+        <div class="wt-modes">
+          <div class="wt-mode active" id="mode-ind" onclick="setMode('ind')">Aus den gewählten Indikatoren</div>
+          <div class="wt-mode" id="mode-text" onclick="setMode('text')">Zusammenfassender Text</div>
+        </div>
+        <div class="worturteil-text" id="worturteilText"></div>
+        <textarea class="worturteil-edit" id="worturteilEdit" style="display:none"></textarea>
+        <span class="toggle-edit" onclick="toggleEdit()">Worturteil bearbeiten</span>
+        <div class="legal">Nutzungshinweise Nr. 4: Auf die Notenbezeichnungen (sehr gut, gut, befriedigend, ausreichend, mangelhaft, ungenügend) sowie auf „relativ, schlecht, schön, beeindruckend, völlig, noch“ ist im Rahmen der Bewertung zu verzichten. Die erzeugten Texte halten diese Vorgabe ein; § 26-Wortlaute sind als Zitat gekennzeichnet.</div>
+      </div>
+
+      <button class="btn-primary btn-export" onclick="exportPDF()">&#8659; Als PDF speichern</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ------------------------------------------------------------------
+   Standardisiertes Leistungsbild zur praktischen Prüfung
+   Indikatorenwortlaut unverändert übernommen (Stand 13.12.13).
+   ------------------------------------------------------------------ */
+const CRITERIA = {
+  planung: [
+    { id:'p1', prefix:'Der Entwurf in seiner Gesamtdarstellung', title:'Gesamtdarstellung', desc:'Der Entwurf in seiner Gesamtdarstellung',
+      indicators:['wird stringent und logisch strukturiert','wird überwiegend stringent und schlüssig strukturiert','wird zweckmäßig strukturiert','wird erkennbar und nachvollziehbar strukturiert','wird kaum strukturiert','ist konzeptionslos'] },
+    { id:'p2', prefix:'Formale Vorgaben, Aspekte, Kriterien', title:'Formale Vorgaben, Aspekte, Kriterien', desc:'Einhaltung der formalen Anforderungen',
+      indicators:['werden vollständig und fehlerfrei eingehalten','werden überwiegend fehlerfrei eingehalten','werden im Wesentlichen eingehalten','werden mit erheblichen Einschränkungen eingehalten','werden kaum eingehalten','werden nicht eingehalten'] },
+    { id:'p3', prefix:'Die fachliche Korrektheit', title:'Fachliche Korrektheit', desc:'Nachweis der fachlichen Korrektheit im Entwurf',
+      indicators:['wird vielschichtig (verdeutlichend differenziert) nachgewiesen','wird fundiert nachgewiesen','wird mit Abstrichen, aber zweckmäßig nachgewiesen','wird punktuell und oberflächlich nachgewiesen','wird kaum sinnvoll und lückenhaft nachgewiesen','wird nicht oder fehlerhaft nachgewiesen'] },
+    { id:'p4', prefix:'Das Anwenden zielgruppenorientierter didaktischer, fachdidaktischer und pädagogischer Konzepte und Methoden', title:'Didaktische, fachdidaktische und pädagogische Konzepte', desc:'Anwenden zielgruppenorientierter Konzepte und Methoden',
+      indicators:['wird vielschichtig und kompetent erörtert','wird umfassend und schlüssig erörtert','wird solide und zweckmäßig erörtert','wird oberflächlich, aber hinreichend erörtert','wird unzureichend erörtert','ist konzeptionslos'] }
+  ],
+  durchfuehrung: [
+    { id:'d1', group:'Beziehungsqualität', prefix:'Eine Lernatmosphäre,', prefixSkip:[4,5], title:'Lernatmosphäre', desc:'Lernförderliches Klima, Lernumgebung',
+      indicators:['welche die Entfaltung der Lernkompetenz jedes einzelnen Schülers im höchsten Maß gewährleistet, wird geschaffen','welche die Entfaltung der Lernkompetenz jedes einzelnen Schülers zielgerichtet gewährleistet, wird geschaffen','welche die Entfaltung der Lernkompetenz jedes einzelnen Schülers grundsätzlich gewährleistet, wird geschaffen','welche die Entfaltung der Lernkompetenz jedes einzelnen Schülers punktuell gewährleistet, wird geschaffen','Eine lernförderliche Atmosphäre wird kaum geschaffen','Eine lernförderliche Atmosphäre wird nicht geschaffen'] },
+    { id:'d2', group:'Beziehungsqualität', prefix:'Die pädagogische Grundhaltung', title:'Pädagogische Grundhaltung', desc:'Wahrnehmbarkeit der pädagogischen Grundhaltung',
+      indicators:['wird professionell zum Ausdruck gebracht','wird überzeugend zum Ausdruck gebracht','ist prinzipiell wahrnehmbar','ist partiell wahrnehmbar','ist unzureichend wahrnehmbar','ist nicht wahrnehmbar'] },
+    { id:'d3', group:'didaktisch-methodisch', prefix:'Der Unterrichtseinstieg', title:'Unterrichtseinstieg', desc:'Schülerorientierte Gestaltung des Einstiegs',
+      indicators:['wird optimal schülerorientiert gestaltet','wird gelungen und schülerorientiert gestaltet','wird praktikabel und schülerorientiert gestaltet','wird bedingt schülerorientiert gestaltet','wird kaum schülerorientiert oder stockend gestaltet','wird nicht schülerorientiert und / oder falsch gestaltet'] },
+    { id:'d4', group:'didaktisch-methodisch', prefix:'Der individuelle Lern- und Kompetenzzuwachs', title:'Individueller Lern- und Kompetenzzuwachs', desc:'Steuerung des individuellen Lern- und Kompetenzzuwachses',
+      indicators:['wird optimal und professionell gesteuert','wird überwiegend professionell und gelungen gesteuert','wird solide und zweckmäßig gesteuert','wird ansatzweise zweckmäßig gesteuert','wird unzureichend gesteuert','wird nicht oder falsch gesteuert'] },
+    { id:'d5', group:'didaktisch-methodisch', prefix:'Verstehens- und Aneignungsprozesse', title:'Verstehens- und Aneignungsprozesse', desc:'Ermöglichung und Unterstützung von Verstehens- und Aneignungsprozessen',
+      indicators:['werden optimal ermöglicht und differenziert unterstützt','werden umfassend ermöglicht und überwiegend differenziert unterstützt','werden grundsätzlich ermöglicht und angemessen unterstützt','werden ansatzweise ermöglicht und unterstützt','werden kaum ermöglicht und unzureichend unterstützt','werden nicht ermöglicht und nicht unterstützt'] },
+    { id:'d6', group:'didaktisch-methodisch', prefix:'Die Steuerung der Lernprozesse', title:'Steuerung der Lernprozesse', desc:'Gelingen der Steuerung der Lernprozesse',
+      indicators:['gelingt optimal und professionell','gelingt zielgerichtet','gelingt zweckmäßig','ist erkennbar','gelingt unzureichend','gelingt nicht'] },
+    { id:'d7', group:'didaktisch-methodisch', prefix:'Die Reflexions- und Feedbackkultur', title:'Reflexions- und Feedbackkultur', desc:'Entwicklung und Pflege der Reflexions- und Feedbackkultur',
+      indicators:['ist konsequent entwickelt und wird nachhaltig gepflegt','ist entwickelt und wird zielgerichtet gepflegt','ist grundsätzlich entwickelt und wird zweckmäßig gepflegt','wird ansatzweise entwickelt','ist wenig entwickelt','ist nicht entwickelt'] },
+    { id:'d8', group:'didaktisch-methodisch', prefix:'', title:'Flexibilität', desc:'Reagieren in unerwarteten Situationen',
+      indicators:['In unerwarteten Situationen wird professionell reagiert und souverän aufgetreten','In unerwarteten Situationen wird überwiegend professionell reagiert und überzeugend aufgetreten','In unerwarteten Situationen wird angemessen reagiert und akzeptabel aufgetreten','In unerwarteten Situationen wird ansatzweise zweckmäßig reagiert','In unerwarteten Situationen wird unzureichend reagiert','In unerwarteten Situationen wird nicht oder falsch reagiert'] },
+    { id:'d9', group:'fachlich', prefix:'Die fachliche und fachsprachliche Korrektheit', title:'Fachliche und fachsprachliche Korrektheit', desc:'Nachweis der fachlichen und fachsprachlichen Korrektheit',
+      indicators:['wird vielschichtig (differenziert, beispielhaft) nachgewiesen','wird fundiert nachgewiesen','wird grundsätzlich nachgewiesen','wird hinreichend nachgewiesen','wird kaum oder lückenhaft nachgewiesen','wird nicht nachgewiesen'] },
+    { id:'d10', group:'pädagogisch-erzieherisch', prefix:'Das Klassenmanagement', title:'Klassenmanagement', desc:'Führung und Umsetzung des Klassenmanagements',
+      indicators:['wird optimal geführt und nachhaltig umgesetzt','wird gelungen geführt und zielgerichtet umgesetzt','wird solide geführt und tragfähig umgesetzt','wird erkennbar geführt und oberflächlich umgesetzt','wird unzureichend geführt','wird nicht oder konzeptionslos geführt'] },
+    { id:'d11', group:'pädagogisch-erzieherisch', prefix:'Sinnstiftendes Kommunizieren, die aktive und passive Sprachkompetenz der Schüler', title:'Sinnstiftendes Kommunizieren / Sprachkompetenz', desc:'Förderung der aktiven und passiven Sprachkompetenz der Schüler',
+      indicators:['wird nachhaltig und sicher gefördert','wird zielgerichtet gefördert','wird zweckmäßig und angemessen gefördert','wird im Ansatz gefördert','wird unzureichend gefördert','wird nicht gefördert'] }
+  ],
+  reflexion: [
+    { id:'r1', prefix:'Erkenntnisse und Erfahrungen, Wertungen und Schlussfolgerungen', title:'Erkenntnisse, Erfahrungen, Wertungen, Schlussfolgerungen', desc:'Fach- und sachlogisches Erörtern',
+      indicators:['werden im besonderen Maße überzeugend fach- und sachlogisch erörtert','werden umfassend und vorwiegend fach- und sachlogisch erörtert','werden angemessen und im Wesentlichen fach- und sachlogisch erörtert','werden oberflächlich und teilweise fach- und sachlogisch erörtert','werden kaum erörtert','werden nicht oder konzeptionslos erörtert'] },
+    { id:'r2', prefix:'Mehrperspektivität', title:'Mehrperspektivität', desc:'Erreichen von Mehrperspektivität',
+      indicators:['wird professionell erreicht','wird zielgerichtet und schlüssig erreicht','wird weitgehend und tragfähig erreicht','wird ansatzweise erreicht','wird kaum erreicht','wird nicht erreicht'] },
+    { id:'r3', prefix:'Das Reflektieren des eigenen Verhaltens und dessen Wirkung im Prozess sowie der Transfer für den persönlichen Lernprozess werden', title:'Eigenes Verhalten, Wirkung und Transfer', desc:'Reflektieren des eigenen Verhaltens und dessen Wirkung; Transfer für den persönlichen Lernprozess',
+      indicators:['logisch analysiert und beispielhaft erläutert','umfassend analysiert und schlüssig erläutert','angemessen analysiert und tragfähig erläutert','oberflächlich analysiert und nachvollziehbar erläutert','lückenhaft analysiert und kaum erläutert','nicht analysiert'] }
+  ]
+};
+
+/* § 26 ThürAZStPLVO: Punktwerte je nach Tendenz */
+const SCALE = [
+  {note:1,word:'sehr gut',pts:'15 – 14',min:14,max:15},
+  {note:2,word:'gut',pts:'13 – 11',min:11,max:13},
+  {note:3,word:'befriedigend',pts:'10 – 8',min:8,max:10},
+  {note:4,word:'ausreichend',pts:'7 – 5',min:5,max:7},
+  {note:5,word:'mangelhaft',pts:'4 – 2',min:2,max:4},
+  {note:6,word:'ungenügend',pts:'1 – 0',min:0,max:1}
+];
+const POINTS_BY_NOTE = [[15,14],[13,12,11],[10,9,8],[7,6,5],[4,3,2],[1,0]];
+/* Vorauswahl: der zur Skalenmitte gelegene Wert der Spanne; jederzeit änderbar */
+const DEFAULT_PT = [14,12,9,6,3,1];
+
+/* § 26 ThürAZStPLVO, Legaldefinition der Notenstufe (Zitat) */
+const PARA26 = {
+  1:'den Anforderungen in besonderem Maße entspricht',
+  2:'den Anforderungen voll entspricht',
+  3:'im Allgemeinen den Anforderungen entspricht',
+  4:'zwar Mängel aufweist, aber im Ganzen den Anforderungen noch entspricht',
+  5:'den Anforderungen nicht entspricht, jedoch erkennen lässt, dass die notwendigen Grundkenntnisse vorhanden sind und die Mängel in absehbarer Zeit behoben werden könnten',
+  6:'den Anforderungen nicht entspricht und bei der selbst die Grundkenntnisse so lückenhaft sind, dass die Mängel in absehbarer Zeit nicht behoben werden können'
+};
+
+const NOTE_COLORS = {
+  1:{bg:'#E8F4E8',border:'#2D6A2D',text:'#1A4A1A'},
+  2:{bg:'#E6F1FB',border:'#185FA5',text:'#0C3A6B'},
+  3:{bg:'#EAF3DE',border:'#3B6D11',text:'#1F4A08'},
+  4:{bg:'#FAEEDA',border:'#854F0B',text:'#633806'},
+  5:{bg:'#FCEBEB',border:'#A32D2D',text:'#751F1F'},
+  6:{bg:'#F7C1C1',border:'#501313',text:'#3A0A0A'}
+};
+
+/* Zusammenfassende Textbausteine – Wortmaterial ausschließlich aus der
+   Adjektivtabelle der Nutzungshinweise (S. 5) der jeweiligen Notenzeile.
+   Notenbezeichnungen und die Begriffe "völlig"/"noch" kommen nicht vor;
+   der § 26-Wortlaut ist als Zitat ausgewiesen. */
+const TEXTBAUSTEIN = {
+1:(n,f,k)=>`${n} zeigte in der praktischen Prüfung im Fach ${f}, Klasse ${k}, eine Leistung, die – im Wortlaut des § 26 ThürAZStPLVO – „den Anforderungen in besonderem Maße entspricht“.
+
+Planung: Der Entwurf ist in seiner Gesamtdarstellung stringent und logisch strukturiert; die formalen Vorgaben sind vollständig und fehlerfrei eingehalten. Die fachliche Korrektheit ist vielschichtig und differenziert nachgewiesen. Die zielgruppenorientierten didaktischen, fachdidaktischen und pädagogischen Konzepte sind vielschichtig und kompetent erörtert.
+
+Durchführung: Eine Lernatmosphäre, welche die Entfaltung der Lernkompetenz jedes einzelnen Schülers im höchsten Maß gewährleistet, wurde geschaffen; die pädagogische Grundhaltung wurde professionell zum Ausdruck gebracht. Der Unterrichtseinstieg wurde optimal schülerorientiert gestaltet, der individuelle Lern- und Kompetenzzuwachs optimal und professionell gesteuert. Verstehens- und Aneignungsprozesse wurden differenziert unterstützt. Das Klassenmanagement wurde optimal geführt und nachhaltig umgesetzt. In unerwarteten Situationen wurde professionell reagiert und souverän aufgetreten.
+
+Reflexion: Erkenntnisse und Erfahrungen, Wertungen und Schlussfolgerungen wurden im besonderen Maße überzeugend fach- und sachlogisch erörtert. Mehrperspektivität wurde professionell erreicht. Das eigene Verhalten und dessen Wirkung im Prozess sowie der Transfer für den persönlichen Lernprozess wurden logisch analysiert und beispielhaft erläutert.`,
+
+2:(n,f,k)=>`${n} zeigte in der praktischen Prüfung im Fach ${f}, Klasse ${k}, eine Leistung, die – im Wortlaut des § 26 ThürAZStPLVO – „den Anforderungen voll entspricht“.
+
+Planung: Der Entwurf ist in seiner Gesamtdarstellung überwiegend stringent und schlüssig strukturiert; die formalen Vorgaben sind überwiegend fehlerfrei eingehalten. Die fachliche Korrektheit ist fundiert nachgewiesen. Die zielgruppenorientierten didaktischen, fachdidaktischen und pädagogischen Konzepte sind umfassend und schlüssig erörtert.
+
+Durchführung: Eine Lernatmosphäre, welche die Entfaltung der Lernkompetenz jedes einzelnen Schülers zielgerichtet gewährleistet, wurde geschaffen; die pädagogische Grundhaltung wurde überzeugend zum Ausdruck gebracht. Der Unterrichtseinstieg wurde gelungen und schülerorientiert gestaltet, der individuelle Lern- und Kompetenzzuwachs überwiegend professionell und gelungen gesteuert. Verstehens- und Aneignungsprozesse wurden umfassend ermöglicht und überwiegend differenziert unterstützt. Das Klassenmanagement wurde gelungen geführt und zielgerichtet umgesetzt. In unerwarteten Situationen wurde überwiegend professionell reagiert und überzeugend aufgetreten.
+
+Reflexion: Erkenntnisse und Erfahrungen, Wertungen und Schlussfolgerungen wurden umfassend und vorwiegend fach- und sachlogisch erörtert. Mehrperspektivität wurde zielgerichtet und schlüssig erreicht. Das eigene Verhalten und dessen Wirkung im Prozess sowie der Transfer für den persönlichen Lernprozess wurden umfassend analysiert und schlüssig erläutert.`,
+
+3:(n,f,k)=>`${n} zeigte in der praktischen Prüfung im Fach ${f}, Klasse ${k}, eine Leistung, die – im Wortlaut des § 26 ThürAZStPLVO – „im Allgemeinen den Anforderungen entspricht“.
+
+Planung: Der Entwurf ist in seiner Gesamtdarstellung zweckmäßig strukturiert; die formalen Vorgaben sind im Wesentlichen eingehalten. Die fachliche Korrektheit ist mit Abstrichen, aber zweckmäßig nachgewiesen. Die zielgruppenorientierten didaktischen, fachdidaktischen und pädagogischen Konzepte sind solide und zweckmäßig erörtert.
+
+Durchführung: Eine Lernatmosphäre, welche die Entfaltung der Lernkompetenz jedes einzelnen Schülers grundsätzlich gewährleistet, wurde geschaffen; die pädagogische Grundhaltung ist prinzipiell wahrnehmbar. Der Unterrichtseinstieg wurde praktikabel und schülerorientiert gestaltet, der individuelle Lern- und Kompetenzzuwachs solide und zweckmäßig gesteuert. Verstehens- und Aneignungsprozesse wurden grundsätzlich ermöglicht und angemessen unterstützt. Das Klassenmanagement wurde solide geführt und tragfähig umgesetzt. In unerwarteten Situationen wurde angemessen reagiert und akzeptabel aufgetreten.
+
+Reflexion: Erkenntnisse und Erfahrungen, Wertungen und Schlussfolgerungen wurden angemessen und im Wesentlichen fach- und sachlogisch erörtert. Mehrperspektivität wurde weitgehend und tragfähig erreicht. Das eigene Verhalten und dessen Wirkung im Prozess sowie der Transfer für den persönlichen Lernprozess wurden angemessen analysiert und tragfähig erläutert.`,
+
+4:(n,f,k)=>`${n} zeigte in der praktischen Prüfung im Fach ${f}, Klasse ${k}, eine Leistung, die – im Wortlaut des § 26 ThürAZStPLVO – „zwar Mängel aufweist, aber im Ganzen den Anforderungen noch entspricht“.
+
+Planung: Der Entwurf ist in seiner Gesamtdarstellung erkennbar und nachvollziehbar strukturiert; die formalen Vorgaben sind mit erheblichen Einschränkungen eingehalten. Die fachliche Korrektheit ist punktuell und oberflächlich nachgewiesen. Die zielgruppenorientierten didaktischen, fachdidaktischen und pädagogischen Konzepte sind oberflächlich, aber hinreichend erörtert.
+
+Durchführung: Eine Lernatmosphäre, welche die Entfaltung der Lernkompetenz jedes einzelnen Schülers punktuell gewährleistet, wurde geschaffen; die pädagogische Grundhaltung ist partiell wahrnehmbar. Der Unterrichtseinstieg wurde bedingt schülerorientiert gestaltet, der individuelle Lern- und Kompetenzzuwachs ansatzweise zweckmäßig gesteuert. Verstehens- und Aneignungsprozesse wurden ansatzweise ermöglicht und unterstützt. Das Klassenmanagement wurde erkennbar geführt und oberflächlich umgesetzt. In unerwarteten Situationen wurde ansatzweise zweckmäßig reagiert.
+
+Reflexion: Erkenntnisse und Erfahrungen, Wertungen und Schlussfolgerungen wurden oberflächlich und teilweise fach- und sachlogisch erörtert. Mehrperspektivität wurde ansatzweise erreicht. Das eigene Verhalten und dessen Wirkung im Prozess sowie der Transfer für den persönlichen Lernprozess wurden oberflächlich analysiert und nachvollziehbar erläutert.`,
+
+5:(n,f,k)=>`${n} zeigte in der praktischen Prüfung im Fach ${f}, Klasse ${k}, eine Leistung, die – im Wortlaut des § 26 ThürAZStPLVO – „den Anforderungen nicht entspricht, jedoch erkennen lässt, dass die notwendigen Grundkenntnisse vorhanden sind und die Mängel in absehbarer Zeit behoben werden könnten“.
+
+Planung: Der Entwurf ist kaum strukturiert; die formalen Vorgaben sind kaum eingehalten. Die fachliche Korrektheit ist kaum sinnvoll und lückenhaft nachgewiesen. Die zielgruppenorientierten didaktischen, fachdidaktischen und pädagogischen Konzepte sind unzureichend erörtert.
+
+Durchführung: Eine lernförderliche Atmosphäre wurde kaum geschaffen; die pädagogische Grundhaltung ist unzureichend wahrnehmbar. Der Unterrichtseinstieg wurde kaum schülerorientiert oder stockend gestaltet, der individuelle Lern- und Kompetenzzuwachs unzureichend gesteuert. Verstehens- und Aneignungsprozesse wurden kaum ermöglicht und unzureichend unterstützt. Das Klassenmanagement wurde unzureichend geführt. In unerwarteten Situationen wurde unzureichend reagiert.
+
+Reflexion: Erkenntnisse und Erfahrungen, Wertungen und Schlussfolgerungen wurden kaum erörtert. Mehrperspektivität wurde kaum erreicht. Das eigene Verhalten und dessen Wirkung im Prozess sowie der Transfer für den persönlichen Lernprozess wurden lückenhaft analysiert und kaum erläutert.`,
+
+6:(n,f,k)=>`${n} zeigte in der praktischen Prüfung im Fach ${f}, Klasse ${k}, eine Leistung, die – im Wortlaut des § 26 ThürAZStPLVO – „den Anforderungen nicht entspricht und bei der selbst die Grundkenntnisse so lückenhaft sind, dass die Mängel in absehbarer Zeit nicht behoben werden können“.
+
+Planung: Der Entwurf ist konzeptionslos; die formalen Vorgaben sind nicht eingehalten. Die fachliche Korrektheit ist nicht oder fehlerhaft nachgewiesen. Ein zielgruppenorientiertes didaktisches, fachdidaktisches und pädagogisches Konzept ist konzeptionslos angelegt.
+
+Durchführung: Eine lernförderliche Atmosphäre wurde nicht geschaffen; die pädagogische Grundhaltung ist nicht wahrnehmbar. Der Unterrichtseinstieg wurde nicht schülerorientiert und / oder falsch gestaltet, der individuelle Lern- und Kompetenzzuwachs nicht oder falsch gesteuert. Verstehens- und Aneignungsprozesse wurden nicht ermöglicht und nicht unterstützt. Das Klassenmanagement wurde nicht oder konzeptionslos geführt. In unerwarteten Situationen wurde nicht oder falsch reagiert.
+
+Reflexion: Erkenntnisse und Erfahrungen, Wertungen und Schlussfolgerungen wurden nicht oder konzeptionslos erörtert. Mehrperspektivität wurde nicht erreicht. Das eigene Verhalten und dessen Wirkung im Prozess sowie der Transfer für den persönlichen Lernprozess wurden nicht analysiert.`
+};
+
+const scores = {};
+let wtMode = 'ind';
+let editMode = false;
+let manualNote = null;
+
+function allItems() { return [...CRITERIA.planung, ...CRITERIA.durchfuehrung, ...CRITERIA.reflexion]; }
+function sentence(item, idx) {
+  const skip = item.prefixSkip && item.prefixSkip.indexOf(idx) !== -1;
+  const p = (skip || !item.prefix) ? '' : item.prefix + ' ';
+  return p + item.indicators[idx] + '.';
+}
+
+function buildCriteria(sectionId, items) {
+  const container = document.getElementById('criteria-' + sectionId);
+  let lastGroup = null;
+  items.forEach(item => {
+    if (item.group && item.group !== lastGroup) {
+      const g = document.createElement('div');
+      g.className = 'group-label';
+      g.textContent = item.group;
+      container.appendChild(g);
+      lastGroup = item.group;
+    }
+    const div = document.createElement('div');
+    div.className = 'criterion';
+    div.innerHTML = `<div class="criterion-title">${item.title}</div>
+      <div class="criterion-desc">${item.desc}</div>
+      <div class="scale" id="scale-${item.id}">
+        ${SCALE.map((s,i) => `<button class="scale-btn" onclick="selectNote('${item.id}',${i},'${sectionId}')" title="${item.indicators[i].replace(/"/g,'&quot;')}">
+          <div class="pts-badge">${s.pts}</div>
+          <div class="scale-note">Note ${s.note}</div>
+          <div class="scale-word">${s.word}</div>
+        </button>`).join('')}
+      </div>
+      <div class="ptrow" id="ptrow-${item.id}"><span class="ptrow-label">Punktwert</span><span id="ptbtns-${item.id}"></span><span class="ptrow-hint">Tendenz innerhalb der Notenstufe (§ 26)</span></div>
+      <div class="preview-text" id="prev-${item.id}"></div>`;
+    container.appendChild(div);
+  });
+}
+
+function selectNote(id, noteIdx, section) {
+  const prev = scores[id];
+  const pts = (prev && prev.noteIdx === noteIdx) ? prev.pts : DEFAULT_PT[noteIdx];
+  scores[id] = { noteIdx, pts, section };
+  renderCriterion(id, section);
+}
+
+function selectPts(id, pts, section) {
+  scores[id].pts = pts;
+  renderCriterion(id, section);
+}
+
+function renderCriterion(id, section) {
+  const s = scores[id];
+  const item = allItems().find(c => c.id === id);
+  document.getElementById('scale-'+id).querySelectorAll('.scale-btn').forEach((b,i) => {
+    b.className = 'scale-btn' + (i === s.noteIdx ? ' sel-' + (s.noteIdx+1) : '');
+  });
+  document.getElementById('ptbtns-'+id).innerHTML = POINTS_BY_NOTE[s.noteIdx].map(p =>
+    `<button class="pt-btn${p===s.pts?' active':''}" onclick="selectPts('${id}',${p},'${section}')">${p}</button>`).join(' ');
+  document.getElementById('ptrow-'+id).className = 'ptrow shown';
+  const prev = document.getElementById('prev-'+id);
+  prev.textContent = 'Vorschau: „' + sentence(item, s.noteIdx) + '“  ·  ' + s.pts + ' Punkte';
+  prev.className = 'preview-text shown';
+  updateBadge(section);
+  updateProgress();
+}
+
+function getAvgPts(items) {
+  const rated = items.filter(i => scores[i.id] !== undefined);
+  if (!rated.length) return null;
+  return rated.reduce((sum,i) => sum + scores[i.id].pts, 0) / rated.length;
+}
+
+/* § 27 Abs. 2 Satz 2 und 3 ThürAZStPLVO:
+   "Zwischenwerte bis 0,5 sind der schlechteren, ab 0,6 der besseren Punktzahl
+    zuzuordnen. Eine zweite Dezimalstelle bleibt unberücksichtigt." */
+function roundVO(x) {
+  const t = Math.floor(x * 10 + 1e-9) / 10;   // zweite Dezimalstelle streichen
+  const ganz = Math.floor(t + 1e-9);
+  const zehntel = Math.round((t - ganz) * 10);
+  return zehntel <= 5 ? ganz : ganz + 1;
+}
+
+function getWeights() {
+  const p = parseFloat(document.getElementById('wP').value);
+  const d = parseFloat(document.getElementById('wD').value);
+  const r = parseFloat(document.getElementById('wR').value);
+  return { p: isNaN(p)?0:p, d: isNaN(d)?0:d, r: isNaN(r)?0:r };
+}
+function resetWeights() {
+  document.getElementById('wP').value = 20;
+  document.getElementById('wD').value = 50;
+  document.getElementById('wR').value = 30;
+  buildErgebnis();
+}
+
+function weightedTotal(pAvg, dAvg, rAvg, w) {
+  const sum = w.p + w.d + w.r;
+  if (sum === 0) return null;
+  return (pAvg * w.p + dAvg * w.d + rAvg * w.r) / sum;
+}
+
+function getNote(pts) { return SCALE.find(s => pts >= s.min && pts <= s.max) || SCALE[SCALE.length-1]; }
+
+function updateBadge(section) {
+  const items = CRITERIA[section];
+  const done = items.filter(i => scores[i.id] !== undefined).length;
+  const el = document.getElementById('badge-'+section);
+  if (!done) { el.textContent = 'nicht bewertet'; return; }
+  el.textContent = done + '/' + items.length + ' · Ø ' + getAvgPts(items).toFixed(1) + ' Pkt.';
+}
+
+function updateProgress() {
+  const all = allItems();
+  const done = all.filter(i => scores[i.id] !== undefined).length;
+  document.getElementById('progressBar').style.width = Math.round(done/all.length*100) + '%';
+}
+
+const VIEW_IDS = ['bewertung','live','ergebnis'];
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  document.querySelectorAll('.tab')[VIEW_IDS.indexOf(id)].classList.add('active');
+  if (id === 'ergebnis') buildErgebnis();
+  if (id === 'live') renderLive();
+}
+
+function setMode(m) {
+  wtMode = m;
+  document.getElementById('mode-ind').className = 'wt-mode' + (m === 'ind' ? ' active' : '');
+  document.getElementById('mode-text').className = 'wt-mode' + (m === 'text' ? ' active' : '');
+  editMode = false;
+  document.getElementById('worturteilText').style.display = 'block';
+  document.getElementById('worturteilEdit').style.display = 'none';
+  document.querySelector('.toggle-edit').textContent = 'Worturteil bearbeiten';
+  renderWorturteil();
+}
+
+function toggleEdit() {
+  editMode = !editMode;
+  const text = document.getElementById('worturteilText');
+  const edit = document.getElementById('worturteilEdit');
+  const toggle = document.querySelector('.toggle-edit');
+  if (editMode) {
+    edit.value = text.textContent;
+    text.style.display = 'none'; edit.style.display = 'block';
+    toggle.textContent = 'Bearbeitung abschließen';
+  } else {
+    text.textContent = edit.value;
+    text.style.display = 'block'; edit.style.display = 'none';
+    toggle.textContent = 'Worturteil bearbeiten';
+  }
+}
+
+function currentState() {
+  const w = getWeights();
+  const pAvg = getAvgPts(CRITERIA.planung);
+  const dAvg = getAvgPts(CRITERIA.durchfuehrung);
+  const rAvg = getAvgPts(CRITERIA.reflexion);
+  const complete = allItems().every(i => scores[i.id] !== undefined);
+  const wOk = Math.abs(w.p + w.d + w.r - 100) < 0.001;
+  const raw = (complete && wOk) ? weightedTotal(pAvg, dAvg, rAvg, w) : null;
+  return { w, pAvg, dAvg, rAvg, complete, wOk, raw,
+           rounded: raw === null ? null : roundVO(raw),
+           vorschlag: raw === null ? null : getNote(roundVO(raw)) };
+}
+
+function buildErgebnis() {
+  const st = currentState();
+
+  const sum = st.w.p + st.w.d + st.w.r;
+  const ws = document.getElementById('weightSum');
+  ws.className = 'weight-sum ' + (st.wOk ? 'ok' : 'bad');
+  ws.textContent = st.wOk ? 'Summe 100 % · gültig' : 'Summe ' + sum + ' % – die Gewichte müssen zusammen 100 % ergeben.';
+
+  const missing = allItems().filter(i => scores[i.id] === undefined);
+  const gate = document.getElementById('gateBox');
+  if (!st.complete || !st.wOk) {
+    let msg = '';
+    if (!st.complete) {
+      msg += '<strong>Noch nicht alle Indikatoren bewertet.</strong> Ein Notenvorschlag wird erst nach vollständiger Bewertung aller 18 Indikatoren ausgegeben. Es fehlen:<ul>'
+           + missing.map(m => '<li>' + m.title + '</li>').join('') + '</ul>';
+    }
+    if (!st.wOk) {
+      msg += (msg ? '<div style="margin-top:10px"></div>' : '') + '<strong>Gewichtung unvollständig.</strong> Die Summe der drei Gewichte muss 100 % betragen.';
+    }
+    gate.innerHTML = '<div class="gate">' + msg + '</div>';
+    document.getElementById('resultBox').style.display = 'none';
+    return;
+  }
+  gate.innerHTML = '';
+  document.getElementById('resultBox').style.display = 'block';
+
+  const labels = ['Planung ('+st.w.p+' %)', 'Durchführung ('+st.w.d+' %)', 'Reflexion ('+st.w.r+' %)'];
+  document.getElementById('scoreGrid').innerHTML = labels.map((l,i) => {
+    const avg = [st.pAvg, st.dAvg, st.rAvg][i];
+    const n = getNote(roundVO(avg));
+    return `<div class="score-card"><div class="score-card-label">${l}</div>
+      <div class="score-card-value">${avg.toFixed(1)}</div>
+      <div class="score-card-sub">gerundet ${roundVO(avg)} P. · Note ${n.note}</div></div>`;
+  }).join('');
+
+  const bars = [
+    {label:labels[0], avg:st.pAvg, color:'#378ADD'},
+    {label:labels[1], avg:st.dAvg, color:'#1D9E75'},
+    {label:labels[2], avg:st.rAvg, color:'#BA7517'},
+    {label:'Gesamt (gewichtet)', avg:st.raw, color:'#534AB7'}
+  ];
+  document.getElementById('barContainer').innerHTML =
+    '<div class="panel-title">Bereichsmittelwerte</div>' +
+    bars.map(b => `<div class="bar-row">
+      <div class="bar-label">${b.label}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(b.avg/15*100)}%;background:${b.color}"></div></div>
+      <div class="bar-pts">${b.avg.toFixed(1)} P.</div></div>`).join('');
+
+  const n = st.vorschlag, c = NOTE_COLORS[n.note];
+  const nd = document.getElementById('noteDisplay');
+  nd.style.background = c.bg; nd.style.borderColor = c.border;
+  nd.innerHTML = `<div class="note-kicker">Rechnerischer Notenvorschlag</div>
+    <div class="note-number" style="color:${c.text}">Note ${n.note}</div>
+    <div class="note-word" style="color:${c.text}">${n.word}</div>
+    <div class="note-range">${st.raw.toFixed(2)} P. → ${st.rounded} P. (§ 27 Abs. 2: zweite Dezimalstelle bleibt unberücksichtigt; bis 0,5 zur schlechteren, ab 0,6 zur besseren Punktzahl)</div>
+    <div class="note-detail" style="color:${c.text};opacity:0.75;">Planung ${st.pAvg.toFixed(1)} · Durchführung ${st.dAvg.toFixed(1)} · Reflexion ${st.rAvg.toFixed(1)}</div>`;
+
+  const sn = document.getElementById('setNote');
+  if (!sn.options.length) {
+    sn.innerHTML = SCALE.map(s => `<option value="${s.note}">Note ${s.note}</option>`).join('');
+  }
+  if (manualNote === null) { sn.value = n.note; fillPts(n.note, st.rounded); }
+  else { fillPts(parseInt(sn.value,10), null); }
+
+  renderWorturteil();
+}
+
+function fillPts(noteNum, preferred) {
+  const sp = document.getElementById('setPts');
+  const list = POINTS_BY_NOTE[noteNum-1];
+  const keep = preferred !== null && list.indexOf(preferred) !== -1 ? preferred : list[Math.min(1, list.length-1)];
+  sp.innerHTML = list.map(p => `<option value="${p}">${p} Punkte</option>`).join('');
+  sp.value = keep;
+}
+
+function onSetNoteChange() {
+  manualNote = parseInt(document.getElementById('setNote').value, 10);
+  fillPts(manualNote, null);
+  renderWorturteil();
+}
+
+function getFestgesetzt() {
+  const noteNum = parseInt(document.getElementById('setNote').value, 10);
+  const pts = parseInt(document.getElementById('setPts').value, 10);
+  return { noteNum, pts };
+}
+
+function renderWorturteil() {
+  const st = currentState();
+  if (!st.complete || !st.wOk) return;
+  const fest = getFestgesetzt();
+
+  const dev = document.getElementById('deviationBox');
+  dev.className = 'deviation' + (fest.noteNum !== st.vorschlag.note ? ' shown' : '');
+
+  const name = document.getElementById('laaName').value || '[Name LAA]';
+  const fach = document.getElementById('fachThema').value || '[Fach / Thema]';
+  const klasse = document.getElementById('klasse').value || '[Klasse]';
+
+  let text;
+  if (wtMode === 'text') {
+    text = TEXTBAUSTEIN[fest.noteNum](name, fach, klasse);
+  } else {
+    const para = (items) => items.map(i => sentence(i, scores[i.id].noteIdx)).join(' ');
+    text = `${name} zeigte in der praktischen Prüfung im Fach ${fach}, Klasse ${klasse}, eine Leistung, die – im Wortlaut des § 26 ThürAZStPLVO – „${PARA26[fest.noteNum]}“.
+
+Planung: ${para(CRITERIA.planung)}
+
+Durchführung: ${para(CRITERIA.durchfuehrung)}
+
+Reflexion: ${para(CRITERIA.reflexion)}`;
+  }
+
+  const devText = document.getElementById('deviationText').value.trim();
+  text += `\n\nBewertung: ${fest.pts} Punkte (Note ${fest.noteNum}).`;
+  if (fest.noteNum !== st.vorschlag.note) {
+    text += `\nAbweichung vom rechnerischen Vorschlag (Note ${st.vorschlag.note}, ${st.rounded} Punkte)`
+          + (devText ? `: ${devText}` : '.');
+  }
+
+  document.getElementById('worturteilText').textContent = text;
+  document.getElementById('worturteilEdit').value = text;
+}
+
+function exportPDF() {
+  const st = currentState();
+  if (!st.complete || !st.wOk) return;
+  const fest = getFestgesetzt();
+  const name = document.getElementById('laaName').value || 'LAA';
+  const datum = document.getElementById('datum').value || new Date().toISOString().split('T')[0];
+  const fach = document.getElementById('fachThema').value || '';
+  const klasse = document.getElementById('klasse').value || '';
+  const worturteil = editMode ? document.getElementById('worturteilEdit').value
+                              : document.getElementById('worturteilText').textContent;
+  const reflexionFreitext = document.getElementById('reflexionFreitext').value.trim();
+  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  const rows = items => items.map(item => {
+    const s = scores[item.id];
+    return `<tr><td>${esc(item.title)}</td><td style="text-align:center;font-weight:600;">${s.pts}</td><td style="text-align:center;">Note ${SCALE[s.noteIdx].note}</td><td style="font-size:11px;color:#444;">${esc(sentence(item, s.noteIdx))}</td></tr>`;
+  }).join('');
+
+  const html = `<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><title>Worturteil – ${esc(name)}</title>
+<style>body{font-family:Arial,sans-serif;margin:2cm;font-size:13px;color:#1a1a1a;}
+h1{font-size:19px;margin-bottom:4px;}h2{font-size:14px;margin:20px 0 8px;border-bottom:1px solid #ccc;padding-bottom:4px;}
+.meta{display:grid;grid-template-columns:1fr 1fr;gap:4px 20px;margin:12px 0 18px;font-size:12px;}
+.meta-item{display:flex;gap:8px;}.meta-label{color:#666;min-width:95px;}
+table{width:100%;border-collapse:collapse;margin-bottom:14px;font-size:12px;}
+th{background:#2E86C1;color:#fff;padding:7px;text-align:left;}td{padding:5px 7px;border:1px solid #ddd;}
+.note-box{background:#eef5fb;border:2px solid #2E86C1;border-radius:8px;padding:14px;text-align:center;margin:14px 0;}
+.note-big{font-size:30px;font-weight:700;color:#1F618D;}
+.vorschlag{font-size:12px;color:#555;margin-top:6px;}
+.worturteil{line-height:1.85;white-space:pre-wrap;font-size:13px;}
+.footer{margin-top:34px;border-top:1px solid #ccc;padding-top:12px;font-size:10.5px;color:#777;line-height:1.6;}
+.sig{display:flex;justify-content:space-between;margin-top:36px;font-size:12px;color:#1a1a1a;}
+@media print{body{margin:1.5cm;}}</style></head><body>
+<h1>Worturteil – Praktische Prüfung</h1>
+<p style="color:#666;font-size:12px;">Staatliches Studienseminar für Lehrerausbildung · Standardisiertes Leistungsbild zur praktischen Prüfung (Stand 13.12.13)</p>
+<div class="meta">
+<div class="meta-item"><span class="meta-label">Name LAA:</span><strong>${esc(name)}</strong></div>
+<div class="meta-item"><span class="meta-label">Datum:</span><strong>${esc(datum)}</strong></div>
+<div class="meta-item"><span class="meta-label">Fach / Thema:</span><strong>${esc(fach)}</strong></div>
+<div class="meta-item"><span class="meta-label">Klasse:</span><strong>${esc(klasse)}</strong></div>
+</div>
+<div class="note-box">
+<div class="note-big">${fest.pts} Punkte – Note ${fest.noteNum}</div>
+<div class="vorschlag">Rechnerischer Vorschlag: ${st.raw.toFixed(2)} P. → ${st.rounded} P. (Note ${st.vorschlag.note})${fest.noteNum !== st.vorschlag.note ? ' · abweichend festgesetzt' : ''}</div>
+<div class="vorschlag">Gewichtung: Planung ${st.w.p} % · Durchführung ${st.w.d} % · Reflexion ${st.w.r} %</div>
+<div class="vorschlag">Bereichsmittelwerte: ${st.pAvg.toFixed(1)} · ${st.dAvg.toFixed(1)} · ${st.rAvg.toFixed(1)} Punkte</div>
+</div>
+<h2>Bewertung der Indikatoren</h2>
+<table><tr><th>Indikator</th><th style="width:56px;">Punkte</th><th style="width:60px;">Note</th><th>Wortlaut Leistungsbild</th></tr>
+<tr><td colspan="4" style="background:#eef5fb;font-weight:700;">Anforderung: Planung</td></tr>${rows(CRITERIA.planung)}
+<tr><td colspan="4" style="background:#eef5fb;font-weight:700;">Anforderung: Durchführung</td></tr>${rows(CRITERIA.durchfuehrung)}
+<tr><td colspan="4" style="background:#eef5fb;font-weight:700;">Anforderung: Reflexion</td></tr>${rows(CRITERIA.reflexion)}
+</table>
+${reflexionFreitext ? `<div style="margin:0 0 14px;padding:10px 12px;background:#fbfcfd;border:1px solid #eee;border-radius:6px;font-size:12px;"><strong>Aussagen der LAA im Prüfungsgespräch:</strong><div style="white-space:pre-wrap;margin-top:6px;line-height:1.6;">${esc(reflexionFreitext)}</div></div>` : ''}
+${(typeof ERWARTUNGEN !== 'undefined' && ERWARTUNGEN.length) ? `<h2>Erwartungen aus dem Entwurf — Abgleich</h2>
+<table><tr><th style="width:70px;">Art</th><th>Erwartung</th><th style="width:80px;">Status</th><th>Beobachtung</th></tr>
+${ERWARTUNGEN.map(e => `<tr><td>${e.art==='irritation'?'Irritation':'Stärke'}</td><td>${esc(e.text)}${e.beleg?`<div style="font-size:10.5px;color:#777;font-style:italic;margin-top:3px;">${esc(e.beleg)}</div>`:''}</td><td>${e.status==='bestaetigt'?'bestätigt':(e.status==='widerlegt'?'widerlegt':'offen')}</td><td style="font-size:11px;">${esc(e.notiz||'')}</td></tr>`).join('')}
+</table>` : ''}
+${(typeof FRAGEN !== 'undefined' && FRAGEN.length) ? `<h2>Verständnisfragen Nachgespräch</h2>
+<table><tr><th style="width:22px;"></th><th>Frage</th><th>Notiz</th></tr>
+${FRAGEN.map(f => `<tr><td style="text-align:center;">${f.gestellt?'✓':''}</td><td>${esc(f.frage)}${(f.schritt||f.theorie)?`<div style="font-size:10.5px;color:#777;margin-top:3px;">${esc([f.schritt,f.theorie].filter(Boolean).join(' · '))}</div>`:''}</td><td style="font-size:11px;">${esc(f.notiz||'')}</td></tr>`).join('')}
+</table>` : ''}
+<h2>Worturteil</h2><div class="worturteil">${esc(worturteil)}</div>
+<div class="sig"><div>Datum: ___________________</div><div>Unterschrift: ___________________</div></div>
+<div class="footer">
+Rechenweg: arithmetisches Mittel der Punktwerte je Anforderungsbereich, gewichtet mit ${st.w.p} / ${st.w.d} / ${st.w.r} Prozent. Rundung nach § 27 Abs. 2 ThürAZStPLVO: die zweite Dezimalstelle bleibt unberücksichtigt, Zwischenwerte bis 0,5 werden der schlechteren, ab 0,6 der besseren Punktzahl zugeordnet.<br>
+Die Gewichtung ist eine Festlegung des Studienseminars und keine Vorgabe des Landesprüfungsamts; nach Nr. 1 der Nutzungshinweise zu den Standardisierten Leistungsbildern erstreckt sich der prüfungsspezifische Beurteilungsspielraum insbesondere auf die Gewichtung einzelner Indikatoren.<br>
+Der rechnerische Wert ist ein Vorschlag. Die Note der Prüfungslehrprobe setzt der Prüfungsausschuss nach § 24 Abs. 6 ThürAZStPLVO fest.<br>
+Grundlagen: ThürAZStPLVO vom 26. April 2016 (GVBl. S. 180) · Standardisiertes Leistungsbild zur praktischen Prüfung, Stand 13.12.13 · Nutzungshinweise, Stand 1. August 2016 · Landesprüfungsamt für Lehrämter Thüringen
+</div>
+</body></html>`;
+
+  const blob = new Blob([html], {type:'text/html'});
+  const url = URL.createObjectURL(blob);
+  const win = window.open(url, '_blank');
+  if (win) win.onload = () => setTimeout(() => win.print(), 600);
+}
+
+/* ------------------------------------------------------------------
+   Live-Beobachtung: Phasenplanung, Timer mit Überzugswarnung, Protokoll.
+   Phasen sind frei editierbar (Name + geplante Minuten), da das
+   Phasenmodell je nach Entwurf variiert (5E, Einstieg/Erarbeitung/
+   Sicherung/Reflexion, o.ä.) und nicht in der App vorgegeben wird.
+   ------------------------------------------------------------------ */
+let PHASES = [
+  { name:'Einstieg', minutes:5 },
+  { name:'Erarbeitung', minutes:15 },
+  { name:'Sicherung', minutes:10 },
+  { name:'Reflexion', minutes:5 }
+];
+const liveState = { activeIdx:null, phaseStart:null, timerHandle:null, log:[] };
+
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return escHtml(s).replace(/"/g,'&quot;'); }
+function fmtTime(sec) {
+  const m = Math.floor(sec/60), s = sec%60;
+  return String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
+function nowLabel() {
+  const d = new Date();
+  return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0') + ':' + String(d.getSeconds()).padStart(2,'0');
+}
+
+function renderPhaseEditor() {
+  document.getElementById('phaseEditor').innerHTML = PHASES.map((p,i) => `
+    <div class="phase-row">
+      <input type="text" value="${escAttr(p.name)}" oninput="PHASES[${i}].name=this.value; renderPhaseButtons();">
+      <input type="number" value="${p.minutes}" min="1" oninput="PHASES[${i}].minutes=parseInt(this.value,10)||1; renderPhaseButtons();">
+      <span class="unit">Min.</span>
+      <button class="btn-small" onclick="removePhase(${i})">✕</button>
+    </div>`).join('');
+}
+function addPhase() { PHASES.push({ name:'Neue Phase', minutes:5 }); renderPhaseEditor(); renderPhaseButtons(); scheduleSave(); }
+function removePhase(i) {
+  if (liveState.activeIdx === i) stopPhase();
+  else if (liveState.activeIdx !== null && liveState.activeIdx > i) liveState.activeIdx--;
+  PHASES.splice(i,1);
+  renderPhaseEditor(); renderPhaseButtons(); scheduleSave();
+}
+
+function renderPhaseButtons() {
+  document.getElementById('phaseButtons').innerHTML = PHASES.map((p,i) => `
+    <button class="phase-btn${liveState.activeIdx===i?' running':''}" onclick="startPhase(${i})">
+      <span>${escHtml(p.name)}</span><span class="planned">${p.minutes} Min. geplant</span>
+    </button>` + (p.impuls ? `<div class="phase-impuls">${escHtml(p.impuls)}</div>` : '')).join('');
+}
+
+function startPhase(i) {
+  if (liveState.activeIdx !== null) logPhaseEnd();
+  liveState.activeIdx = i;
+  liveState.phaseStart = Date.now();
+  if (!liveState.timerHandle) liveState.timerHandle = setInterval(tickClock, 500);
+  renderPhaseButtons();
+  tickClock();
+}
+function stopPhase() {
+  if (liveState.activeIdx !== null) logPhaseEnd();
+  liveState.activeIdx = null;
+  clearInterval(liveState.timerHandle);
+  liveState.timerHandle = null;
+  const clock = document.getElementById('liveClock');
+  clock.textContent = '00:00'; clock.classList.remove('overrun');
+  const status = document.getElementById('liveStatus');
+  status.textContent = 'Keine Phase gestartet.'; status.classList.remove('overrun');
+  renderPhaseButtons();
+}
+function logPhaseEnd() {
+  const p = PHASES[liveState.activeIdx];
+  const elapsedSec = Math.round((Date.now() - liveState.phaseStart) / 1000);
+  const diff = elapsedSec - p.minutes * 60;
+  const diffText = diff > 0 ? ` (überzogen um ${fmtTime(diff)})` : '';
+  liveState.log.push({ time: nowLabel(), text: `Phase „${p.name}“ beendet nach ${fmtTime(elapsedSec)}${diffText}` });
+  renderLog(); scheduleSave();
+}
+function tickClock() {
+  if (liveState.activeIdx === null) return;
+  const p = PHASES[liveState.activeIdx];
+  const elapsedSec = Math.round((Date.now() - liveState.phaseStart) / 1000);
+  const plannedSec = p.minutes * 60;
+  const clock = document.getElementById('liveClock');
+  const status = document.getElementById('liveStatus');
+  clock.textContent = fmtTime(elapsedSec);
+  if (elapsedSec > plannedSec) {
+    clock.classList.add('overrun');
+    status.classList.add('overrun');
+    status.textContent = `„${p.name}“ überzogen um ${fmtTime(elapsedSec - plannedSec)}`;
+  } else {
+    clock.classList.remove('overrun');
+    status.classList.remove('overrun');
+    status.textContent = `„${p.name}“ läuft · geplant ${p.minutes}:00`;
+  }
+}
+function addNote() {
+  const input = document.getElementById('quickNote');
+  const text = input.value.trim();
+  if (!text) return;
+  const phaseName = liveState.activeIdx !== null ? PHASES[liveState.activeIdx].name : 'ohne aktive Phase';
+  liveState.log.push({ time: nowLabel(), text: `[${phaseName}] ${text}` });
+  input.value = '';
+  renderLog(); scheduleSave();
+}
+function renderLog() {
+  const c = document.getElementById('protocolLog');
+  if (!liveState.log.length) { c.innerHTML = '<span class="protocol-empty">Noch keine Einträge.</span>'; return; }
+  c.innerHTML = liveState.log.slice().reverse().map(e =>
+    `<div class="protocol-entry"><span class="ts">${e.time}</span>${escHtml(e.text)}</div>`).join('');
+}
+/* ------------------------------------------------------------------
+   Import der Entwurfsanalyse (JSON) — erzeugt aus der Claude-Analyse.
+   Erwartetes Schema (alle Felder optional):
+   {
+     "meta":    { "laaName":"", "fachThema":"", "klasse":"", "datum":"JJJJ-MM-TT" },
+     "phasen":  [ { "name":"Einstieg", "minuten":5, "impuls":"Beobachtungsimpuls" } ],
+     "erwartungen": [ { "art":"staerke"|"irritation", "text":"", "beleg":"" } ],
+     "fragen":  [ { "frage":"", "schritt":"Beobachtung", "theorie":"Helmke" } ]
+   }
+   Bewertungen werden bewusst NICHT importiert.
+   ------------------------------------------------------------------ */
+let ERWARTUNGEN = [];
+let FRAGEN = [];
+
+function importStatus(msg, ok) {
+  const el = document.getElementById('importStatus');
+  el.className = 'import-status shown ' + (ok ? 'ok' : 'err');
+  el.textContent = msg;
+}
+
+function handleImportFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => applyImport(e.target.result);
+  reader.onerror = () => importStatus('Datei konnte nicht gelesen werden.', false);
+  reader.readAsText(file);
+}
+
+function applyImport(raw) {
+  let d;
+  try { d = JSON.parse(raw); }
+  catch (e) { importStatus('Kein gültiges JSON: ' + e.message, false); return; }
+
+  const done = [];
+
+  if (d.meta && typeof d.meta === 'object') {
+    ['laaName','fachThema','klasse','datum'].forEach(k => {
+      if (d.meta[k]) { const el = document.getElementById(k); if (el) el.value = d.meta[k]; }
+    });
+    done.push('Kopfdaten');
+  }
+
+  if (Array.isArray(d.phasen) && d.phasen.length) {
+    PHASES = d.phasen.map(p => ({
+      name: String(p.name || 'Phase'),
+      minutes: parseInt(p.minuten != null ? p.minuten : p.minutes, 10) || 5,
+      impuls: p.impuls ? String(p.impuls) : ''
+    }));
+    done.push(PHASES.length + ' Phasen');
+  }
+
+  if (Array.isArray(d.erwartungen)) {
+    ERWARTUNGEN = d.erwartungen.map(e => ({
+      art: (e.art === 'irritation') ? 'irritation' : 'staerke',
+      text: String(e.text || ''),
+      beleg: e.beleg ? String(e.beleg) : '',
+      status: null, notiz: ''
+    }));
+    done.push(ERWARTUNGEN.length + ' Erwartungen');
+  }
+
+  if (Array.isArray(d.fragen)) {
+    FRAGEN = d.fragen.map(f => ({
+      frage: String(f.frage || ''),
+      schritt: f.schritt ? String(f.schritt) : '',
+      theorie: f.theorie ? String(f.theorie) : '',
+      gestellt: false, notiz: ''
+    }));
+    done.push(FRAGEN.length + ' Fragen');
+  }
+
+  if (!done.length) { importStatus('JSON gelesen, aber keine bekannten Felder gefunden (meta, phasen, erwartungen, fragen).', false); return; }
+
+  renderLive();
+  scheduleSave();
+  importStatus('Importiert: ' + done.join(' · ') + '. Bewertungen wurden nicht verändert.', true);
+}
+
+function renderErwartungen() {
+  const c = document.getElementById('expList');
+  if (!ERWARTUNGEN.length) { c.innerHTML = '<span class="protocol-empty">Keine Erwartungen importiert.</span>'; return; }
+  c.innerHTML = ERWARTUNGEN.map((e,i) => `
+    <div class="exp-item">
+      <div class="exp-head">
+        <span class="exp-kind ${e.art}">${e.art === 'irritation' ? 'Irritation' : 'Stärke'}</span>
+        <div class="exp-text">${escHtml(e.text)}
+          ${e.beleg ? `<div class="exp-beleg">Entwurfsbeleg: ${escHtml(e.beleg)}</div>` : ''}</div>
+      </div>
+      <div class="exp-actions">
+        <button class="exp-btn${e.status==='bestaetigt'?' on-conf':''}" onclick="setExp(${i},'bestaetigt')">bestätigt</button>
+        <button class="exp-btn${e.status==='widerlegt'?' on-wid':''}" onclick="setExp(${i},'widerlegt')">widerlegt</button>
+        <button class="exp-btn" onclick="setExp(${i},null)">offen</button>
+      </div>
+      <textarea class="exp-note" placeholder="Beobachtungsnotiz" oninput="ERWARTUNGEN[${i}].notiz=this.value; scheduleSave();">${escHtml(e.notiz)}</textarea>
+    </div>`).join('');
+}
+function setExp(i, status) {
+  ERWARTUNGEN[i].status = (ERWARTUNGEN[i].status === status) ? null : status;
+  renderErwartungen(); scheduleSave();
+}
+
+function renderFragen() {
+  const c = document.getElementById('qList');
+  if (!FRAGEN.length) { c.innerHTML = '<span class="protocol-empty">Keine Fragen importiert.</span>'; return; }
+  c.innerHTML = FRAGEN.map((f,i) => `
+    <div class="q-item">
+      <div class="q-top">
+        <input type="checkbox" ${f.gestellt?'checked':''} onchange="FRAGEN[${i}].gestellt=this.checked; scheduleSave();">
+        <div>
+          <div class="q-text">${escHtml(f.frage)}</div>
+          ${(f.schritt || f.theorie) ? `<div class="q-meta">${escHtml([f.schritt, f.theorie].filter(Boolean).join(' · '))}</div>` : ''}
+        </div>
+      </div>
+      <textarea class="q-note" placeholder="Antwort der LAA / Notiz" oninput="FRAGEN[${i}].notiz=this.value; scheduleSave();">${escHtml(f.notiz)}</textarea>
+    </div>`).join('');
+}
+
+function renderLive() { renderPhaseEditor(); renderPhaseButtons(); renderLog(); renderErwartungen(); renderFragen(); }
+
+/* ------------------------------------------------------------------
+   Datenverlustschutz: gesamter Arbeitsstand wird bei jeder Änderung
+   in localStorage gespeichert und beim Laden wiederhergestellt.
+   Speicherung erfolgt ausschließlich lokal im Browser dieses Geräts —
+   keine Übertragung. Beim Abschluss einer Prüfung "Neue Prüfung"
+   verwenden, damit keine Daten in die nächste Prüfung übernommen werden.
+   ------------------------------------------------------------------ */
+const STORAGE_KEY = 'leistungsbild_pruefung_v1';
+let saveTimer = null;
+
+const META_IDS = ['laaName','fachThema','klasse','datum','reflexionFreitext','wP','wD','wR','deviationText'];
+
+function collectState() {
+  const meta = {};
+  META_IDS.forEach(id => { const el = document.getElementById(id); if (el) meta[id] = el.value; });
+  return {
+    savedAt: new Date().toISOString(),
+    meta, scores, phases: PHASES, log: liveState.log,
+    erwartungen: ERWARTUNGEN, fragen: FRAGEN,
+    manualNote,
+    setNote: document.getElementById('setNote') ? document.getElementById('setNote').value : null,
+    setPts: document.getElementById('setPts') ? document.getElementById('setPts').value : null,
+    worturteilEdit: document.getElementById('worturteilEdit').value,
+    editMode, wtMode
+  };
+}
+
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(collectState()));
+    showSaveStatus('Gespeichert ' + new Date().toLocaleTimeString('de-DE'));
+  } catch (e) {
+    showSaveStatus('Speichern fehlgeschlagen — Arbeitsstand nur im Fenster vorhanden', true);
+  }
+}
+function scheduleSave() { clearTimeout(saveTimer); saveTimer = setTimeout(saveState, 400); }
+
+function showSaveStatus(text, isError) {
+  const el = document.getElementById('saveStatus');
+  if (!el) return;
+  el.textContent = text;
+  el.style.color = isError ? '#A32D2D' : '#7a8a99';
+}
+
+function restoreState() {
+  let raw;
+  try { raw = localStorage.getItem(STORAGE_KEY); } catch (e) { return false; }
+  if (!raw) return false;
+  let d;
+  try { d = JSON.parse(raw); } catch (e) { return false; }
+
+  if (d.meta) META_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && d.meta[id] !== undefined) el.value = d.meta[id];
+  });
+  if (d.scores) Object.keys(d.scores).forEach(id => {
+    const item = allItems().find(c => c.id === id);
+    if (!item) return;
+    scores[id] = d.scores[id];
+    try { renderCriterion(id, d.scores[id].section); } catch (e) {}
+  });
+  if (Array.isArray(d.phases) && d.phases.length) PHASES = d.phases;
+  if (Array.isArray(d.log)) liveState.log = d.log;
+  if (Array.isArray(d.erwartungen)) ERWARTUNGEN = d.erwartungen;
+  if (Array.isArray(d.fragen)) FRAGEN = d.fragen;
+  if (d.manualNote !== undefined) manualNote = d.manualNote;
+  if (d.wtMode) wtMode = d.wtMode;
+  if (d.worturteilEdit) document.getElementById('worturteilEdit').value = d.worturteilEdit;
+
+  ['planung','durchfuehrung','reflexion'].forEach(updateBadge);
+  updateProgress();
+  const when = d.savedAt ? new Date(d.savedAt).toLocaleString('de-DE') : 'unbekannt';
+  showSaveStatus('Arbeitsstand vom ' + when + ' wiederhergestellt');
+  return true;
+}
+
+function resetAll() {
+  if (!confirm('Gesamten Arbeitsstand löschen und neue Prüfung beginnen? Der gespeicherte Stand wird unwiderruflich entfernt.')) return;
+  try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+  location.reload();
+}
+
+/* Änderungen an allen relevanten Feldern erfassen */
+document.addEventListener('input', scheduleSave);
+document.addEventListener('change', scheduleSave);
+window.addEventListener('beforeunload', saveState);
+
+/* Drag & Drop für den JSON-Import */
+(function initDrop(){
+  const drop = document.getElementById('importDrop');
+  if (!drop) return;
+  ['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => {
+    e.preventDefault(); e.stopPropagation(); drop.classList.add('dragover');
+  }));
+  ['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => {
+    e.preventDefault(); e.stopPropagation(); drop.classList.remove('dragover');
+  }));
+  drop.addEventListener('drop', e => {
+    const f = e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) handleImportFile(f);
+  });
+})();
+
+buildCriteria('planung', CRITERIA.planung);
+buildCriteria('durchfuehrung', CRITERIA.durchfuehrung);
+buildCriteria('reflexion', CRITERIA.reflexion);
+const restored = restoreState();
+if (!restored) document.getElementById('datum').value = new Date().toISOString().split('T')[0];
+['laaName','fachThema','klasse'].forEach(id => document.getElementById(id).addEventListener('input', () => {
+  const st = currentState(); if (st.complete && st.wOk) renderWorturteil();
+}));
+
+/* Service Worker registrieren – nur wenn über http(s) ausgeliefert.
+   Bei lokalem Aufruf (file://) wird still übersprungen. */
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+</script>
+</body></html>
