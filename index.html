@@ -256,8 +256,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-s
       <div class="import-drop" id="importDrop" onclick="document.getElementById('importFile').click()">
         JSON-Datei hierher ziehen oder klicken zum Auswählen
       </div>
-      <input type="file" id="importFile" accept=".json,application/json" style="display:none" onchange="handleImportFile(this.files[0])">
+      <input type="file" id="importFile" style="display:none" onchange="handleImportFile(this.files[0])">
       <div class="import-status" id="importStatus"></div>
+      <div style="margin-top:12px;">
+        <label style="display:block;font-size:11px;color:#666;margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Alternative: JSON-Text einfügen</label>
+        <textarea id="importPaste" placeholder="JSON hier einfügen, dann auf Übernehmen tippen." style="width:100%;min-height:90px;padding:10px;font-size:12px;border:1px solid #ddd;border-radius:8px;font-family:ui-monospace,Menlo,monospace;resize:vertical;line-height:1.4;"></textarea>
+        <button class="btn-small" style="margin-top:8px;" onclick="importAusFeld()">Übernehmen</button>
+      </div>
       <div class="weight-note">Der Import füllt Kopfdaten, Phasenplanung mit Beobachtungsimpulsen, den Erwartungsabgleich und die Nachgesprächsfragen. Bewertungen werden bewusst nicht vorbelegt.</div>
     </div>
 
@@ -977,6 +982,11 @@ function renderLog() {
 let ERWARTUNGEN = [];
 let FRAGEN = [];
 
+function importAusFeld() {
+  const t = document.getElementById('importPaste').value.trim();
+  if (!t) { importStatus('Das Einfügefeld ist leer.', false); return; }
+  applyImport(t);
+}
 function importStatus(msg, ok) {
   const el = document.getElementById('importStatus');
   el.className = 'import-status shown ' + (ok ? 'ok' : 'err');
@@ -1193,13 +1203,8 @@ if (!restored) document.getElementById('datum').value = new Date().toISOString()
 ['laaName','fachThema','klasse'].forEach(id => document.getElementById(id).addEventListener('input', () => {
   const st = currentState(); if (st.complete && st.wOk) renderWorturteil();
 }));
-
-/* Service Worker registrieren – nur wenn über http(s) ausgeliefert.
-   Bei lokalem Aufruf (file://) wird still übersprungen. */
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
-  });
+  window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(() => {}); });
 }
 </script>
 </body></html>
