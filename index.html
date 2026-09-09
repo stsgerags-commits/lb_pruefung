@@ -355,6 +355,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-s
       </div>
 
       <button class="btn-primary btn-export" onclick="exportPDF()">&#8659; Als PDF speichern</button>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+      <button class="btn-small" style="flex:1;" onclick="sicherungExport()">Sicherungsdatei erzeugen</button>
+      <button class="btn-small" style="flex:1;" onclick="document.getElementById('sicherungFile').click()">Sicherung einlesen</button>
+      <input type="file" id="sicherungFile" style="display:none" onchange="sicherungDateiLesen(this.files[0])">
+    </div>
+    <div class="weight-note">Die Sicherungsdatei enthält den vollständigen Arbeitsstand dieser Prüfung einschließlich Bewertungen und Protokoll. Sie dient zum Übertragen auf ein anderes Gerät und zum Archivieren, bevor eine Prüfung gelöscht wird.</div>
     </div>
   </div>
 
@@ -850,6 +856,14 @@ ${(typeof FRAGEN !== 'undefined' && FRAGEN.length) ? `<h2>Verständnisfragen Nac
 <table><tr><th style="width:22px;"></th><th>Frage</th><th>Notiz</th></tr>
 ${FRAGEN.map(f => `<tr><td style="text-align:center;">${f.gestellt?'✓':''}</td><td>${esc(f.frage)}${(f.schritt||f.theorie)?`<div style="font-size:10.5px;color:#777;margin-top:3px;">${esc([f.schritt,f.theorie].filter(Boolean).join(' · '))}</div>`:''}</td><td style="font-size:11px;">${esc(f.notiz||'')}</td></tr>`).join('')}
 </table>` : ''}
+${(typeof liveState !== 'undefined' && liveState.log && liveState.log.length) ? `<h2>Protokoll der Unterrichtsstunde</h2>
+<table><tr><th style="width:70px;">Zeit</th><th>Eintrag</th></tr>
+${liveState.log.map(e => `<tr><td>${esc(e.time)}</td><td>${esc(e.text)}</td></tr>`).join('')}
+</table>` : ''}
+${(typeof PHASES !== 'undefined' && PHASES.length) ? `<h2>Geplante Phasen</h2>
+<table><tr><th>Phase</th><th style="width:70px;">Geplant</th><th>Beobachtungsimpuls</th></tr>
+${PHASES.map(ph => `<tr><td>${esc(ph.name)}</td><td>${ph.minutes} Min.</td><td style="font-size:11px;">${esc(ph.impuls||'')}</td></tr>`).join('')}
+</table>` : ''}
 <h2>Worturteil</h2><div class="worturteil">${esc(worturteil)}</div>
 <div class="sig"><div>Datum: ___________________</div><div>Unterschrift: ___________________</div></div>
 <div class="footer">
@@ -988,6 +1002,66 @@ function renderLog() {
    ------------------------------------------------------------------ */
 let ERWARTUNGEN = [];
 let FRAGEN = [];
+
+/* ------------------------------------------------------------------
+   Sicherung: vollständiger Arbeitsstand einer Prüfung als JSON-Datei.
+   Enthält Bewertungen, Protokoll, Erwartungen, Fragen und Worturteil —
+   im Unterschied zur Entwurfs-JSON, die nur die Analyse einspeist.
+   ------------------------------------------------------------------ */
+function dateiName() {
+  const n = (document.getElementById('laaName').value || 'Pruefung').trim()
+              .replace(/[^A-Za-z0-9ÄÖÜäöüß -]/g, '').replace(/\s+/g, '_');
+  const d = (document.getElementById('datum').value || '').trim();
+  return 'Sicherung_' + n + (d ? '_' + d : '') + '.json';
+}
+
+function sicherungExport() {
+  let daten;
+  try { daten = collectState(); }
+  catch (e) { alert('Der Arbeitsstand konnte nicht gelesen werden.'); return; }
+  daten.formatVersion = 'lb-sicherung-1';
+  const text = JSON.stringify(daten, null, 2);
+  try {
+    const blob = new Blob([text], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = dateiName();
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
+  } catch (e) {
+    /* Rückfall, falls der Download nicht möglich ist: Text zum Kopieren anzeigen */
+    const feld = document.getElementById('importPaste');
+    if (feld) { feld.value = text; showView('live'); }
+    alert('Der Download ist hier nicht möglich. Die Sicherung steht zum Kopieren im Einfügefeld unter Live-Beobachtung.');
+  }
+}
+
+function sicherungDateiLesen(file) {
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = e => sicherungEinlesen(e.target.result);
+  r.onerror = () => alert('Die Datei konnte nicht gelesen werden.');
+  r.readAsText(file);
+}
+
+function sicherungEinlesen(roh) {
+  let d;
+  try { d = JSON.parse(roh); }
+  catch (e) { alert('Kein gültiges JSON: ' + e.message); return; }
+  if (!d || !d.meta || !d.scores) {
+    alert('Das ist keine Sicherungsdatei dieser App. Eine Entwurfsanalyse wird unter Live-Beobachtung eingelesen.');
+    return;
+  }
+  const bez = (d.meta.laaName || 'ohne Namen') + (d.meta.datum ? ', ' + d.meta.datum : '');
+  if (!confirm('Sicherung von „' + bez + '" als neue Prüfung anlegen? Der aktuelle Stand bleibt erhalten.')) return;
+  saveState();
+  const neueAkte = neueId();
+  try {
+    localStorage.setItem(schluessel(neueAkte), JSON.stringify(d));
+    localStorage.setItem(AKTIV_KEY, neueAkte);
+  } catch (e) { alert('Die Sicherung konnte nicht gespeichert werden.'); return; }
+  location.reload();
+}
 
 function importAusFeld() {
   const t = document.getElementById('importPaste').value.trim();
