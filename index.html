@@ -223,12 +223,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-s
   </div>
 
   <div class="tabs">
-    <div class="tab active" onclick="showView('bewertung')">Bewertung</div>
-    <div class="tab" onclick="showView('live')">Live-Beobachtung</div>
+    <div class="tab active" onclick="showView('live')">Live-Beobachtung</div>
+    <div class="tab" onclick="showView('bewertung')">Bewertung</div>
     <div class="tab" onclick="showView('ergebnis')">Ergebnis &amp; Worturteil</div>
   </div>
 
-  <div class="view active" id="view-bewertung">
+  <div class="view" id="view-bewertung">
     <div class="meta-grid">
       <div class="meta-field"><label>Name LAA</label><input type="text" id="laaName" placeholder="Vorname Nachname" /></div>
       <div class="meta-field"><label>Fach / Thema</label><input type="text" id="fachThema" placeholder="z. B. Mathematik – Verdoppeln" /></div>
@@ -256,7 +256,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-s
     <button class="btn-primary" onclick="showView('ergebnis')">Zum Ergebnis →</button>
   </div>
 
-  <div class="view" id="view-live">
+  <div class="view active" id="view-live">
 
     <div class="panel">
       <div class="panel-title">Entwurfsanalyse importieren (JSON)</div>
@@ -305,6 +305,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-s
       <div class="panel-title">Verständnisfragen Nachgespräch</div>
       <div id="qList"></div>
     </div>
+
+    <button class="btn-primary" onclick="showView('bewertung')">Zur Bewertung →</button>
 
   </div>
 
@@ -621,7 +623,7 @@ function updateProgress() {
   document.getElementById('progressBar').style.width = Math.round(done/all.length*100) + '%';
 }
 
-const VIEW_IDS = ['bewertung','live','ergebnis'];
+const VIEW_IDS = ['live','bewertung','ergebnis'];
 function showView(id) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -1354,6 +1356,7 @@ if (!aktiveId) {
 }
 const restored = restoreState();
 renderAktenwahl();
+renderLive();   // Startansicht ist die Live-Beobachtung, daher gleich aufbauen
 ['laaName','datum','fachThema'].forEach(id => {
   const el = document.getElementById(id);
   if (el) el.addEventListener('input', () => setTimeout(renderAktenwahl, 450));
