@@ -143,6 +143,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-s
 .phase-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
 .phase-row input[type="text"] { flex: 1; min-width: 120px; padding: 8px 10px; font-size: 13px; border: 1px solid #ddd; border-radius: 8px; }
 .phase-row .zeit-feld { width: 68px; flex: 0 0 auto; text-align: center; }
+.phase-row .zeit-feld.abgeleitet { color: #8a9aa8; background: #fafbfc; }
 .phase-row input[type="number"] { width: 70px; padding: 8px 10px; font-size: 13px; border: 1px solid #ddd; border-radius: 8px; }
 .phase-row .unit { font-size: 12px; color: #888; }
 
@@ -292,6 +293,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-s
       <div class="panel-title">Phasenplanung (aus dem Verlaufsplan des Entwurfs)</div>
       <div id="phaseEditor"></div>
       <button class="btn-small" onclick="addPhase()">+ Phase hinzufügen</button>
+      <div class="weight-note">Nur die Startzeit der ersten Phase eintragen (z. B. 09:30). Die folgenden Zeiten schreibt die App aus den Minutenangaben fort und zeigt sie grau.</div>
     </div>
 
     <div class="panel">
@@ -921,7 +923,8 @@ function startZeit(i){
 function renderPhaseEditor() {
   document.getElementById('phaseEditor').innerHTML = PHASES.map((p,i) => `
     <div class="phase-row">
-      <input type="text" class="zeit-feld" value="${escAttr(p.start||'')}" placeholder="${startZeit(i)||'09:00'}" title="Startzeit, z. B. 09:05 — leer lassen heißt fortschreiben"
+      <input type="text" class="zeit-feld${(!p.start && startZeit(i))?' abgeleitet':''}" value="${escAttr(p.start || startZeit(i) || '')}" placeholder="Start"
+             title="Startzeit, z. B. 09:05. Wird nichts eingetragen, schreibt die App die Zeit aus der vorherigen Phase fort."
              oninput="PHASES[${i}].start=this.value; renderPhaseEditor(); renderPhaseButtons(); scheduleSave();">
       <input type="text" value="${escAttr(p.name)}" oninput="PHASES[${i}].name=this.value; renderPhaseButtons();">
       <input type="number" value="${p.minutes}" min="1" oninput="PHASES[${i}].minutes=parseInt(this.value,10)||1; renderPhaseEditor(); renderPhaseButtons();">
