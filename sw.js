@@ -2,7 +2,7 @@
    Zwischengespeichert wird ausschließlich die Anwendung selbst.
    Prüfungsdaten liegen im localStorage und werden hier nicht berührt. */
 
-const CACHE = 'lb-pruefung-v5';
+const CACHE = 'lb-pruefung-v7';
 const ASSETS = [
   './',
   './index.html',

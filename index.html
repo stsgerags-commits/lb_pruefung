@@ -8,7 +8,7 @@
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="LB Prüfung">
+<meta name="apple-mobile-web-app-title" content="PP">
 <meta name="mobile-web-app-capable" content="yes">
 <title>Bewertung Praktische Prüfung – Standardisiertes Leistungsbild Thüringen</title>
 <style>
@@ -142,6 +142,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-s
 
 .phase-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
 .phase-row input[type="text"] { flex: 1; min-width: 120px; padding: 8px 10px; font-size: 13px; border: 1px solid #ddd; border-radius: 8px; }
+.phase-row .zeit-feld { width: 68px; flex: 0 0 auto; text-align: center; }
 .phase-row input[type="number"] { width: 70px; padding: 8px 10px; font-size: 13px; border: 1px solid #ddd; border-radius: 8px; }
 .phase-row .unit { font-size: 12px; color: #888; }
 
@@ -853,8 +854,8 @@ ${(typeof FRAGEN !== 'undefined' && FRAGEN.length) ? `<h2>Verständnisfragen Nac
 ${FRAGEN.map(f => `<tr><td style="text-align:center;">${f.gestellt?'✓':''}</td><td>${esc(f.frage)}${(f.schritt||f.theorie)?`<div style="font-size:10.5px;color:#777;margin-top:3px;">${esc([f.schritt,f.theorie].filter(Boolean).join(' · '))}</div>`:''}</td><td style="font-size:11px;">${esc(f.notiz||'')}</td></tr>`).join('')}
 </table>` : ''}
 ${(typeof PHASES !== 'undefined' && PHASES.length) ? `<h2>Unterrichtsverlauf</h2>
-<table><tr><th style="width:26%;">Phase</th><th style="width:60px;">Geplant</th><th>Beobachtungsimpuls und Bemerkungen</th></tr>
-${PHASES.map(ph => `<tr><td>${esc(ph.name)}</td><td>${ph.minutes} Min.</td><td style="font-size:11px;">${ph.impuls?`<em>${esc(ph.impuls)}</em>`:''}${(ph.log&&ph.log.length)?`<div style="margin-top:4px;">${ph.log.map(e=>`${esc(e.time)} &nbsp; ${esc(e.text)}`).join('<br>')}</div>`:''}</td></tr>`).join('')}
+<table><tr><th style="width:52px;">Zeit</th><th style="width:24%;">Phase</th><th style="width:56px;">Geplant</th><th>Beobachtungsimpuls und Bemerkungen</th></tr>
+${PHASES.map((ph,i) => `<tr><td>${esc(startZeit(i))}</td><td>${esc(ph.name)}</td><td>${ph.minutes} Min.</td><td style="font-size:11px;">${ph.impuls?`<em>${esc(ph.impuls)}</em>`:''}${(ph.log&&ph.log.length)?`<div style="margin-top:4px;">${ph.log.map(e=>`${esc(e.time)} &nbsp; ${esc(e.text)}`).join('<br>')}</div>`:''}</td></tr>`).join('')}
 </table>` : ''}
 <h2>Worturteil</h2><div class="worturteil">${esc(worturteil)}</div>
 <div class="sig"><div>Datum: ___________________</div><div>Unterschrift: ___________________</div></div>
@@ -900,16 +901,35 @@ function nowLabel() {
   return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0') + ':' + String(d.getSeconds()).padStart(2,'0');
 }
 
+/* Startzeit je Phase. Ist sie nicht gesetzt, wird sie aus der
+   vorherigen Phase plus deren Dauer fortgeschrieben — es genügt
+   also, die Startzeit der ersten Phase einzutragen. */
+function startZeit(i){
+  for(let k=i;k>=0;k--){
+    const roh=(PHASES[k].start||'').trim();
+    const m=roh.match(/^(\d{1,2})[:.](\d{2})$/);
+    if(m){
+      let min=parseInt(m[1],10)*60+parseInt(m[2],10);
+      for(let j=k;j<i;j++) min+=PHASES[j].minutes||0;
+      min=((min%1440)+1440)%1440;
+      return String(Math.floor(min/60)).padStart(2,'0')+':'+String(min%60).padStart(2,'0');
+    }
+  }
+  return '';
+}
+
 function renderPhaseEditor() {
   document.getElementById('phaseEditor').innerHTML = PHASES.map((p,i) => `
     <div class="phase-row">
+      <input type="text" class="zeit-feld" value="${escAttr(p.start||'')}" placeholder="${startZeit(i)||'09:00'}" title="Startzeit, z. B. 09:05 — leer lassen heißt fortschreiben"
+             oninput="PHASES[${i}].start=this.value; renderPhaseEditor(); renderPhaseButtons(); scheduleSave();">
       <input type="text" value="${escAttr(p.name)}" oninput="PHASES[${i}].name=this.value; renderPhaseButtons();">
-      <input type="number" value="${p.minutes}" min="1" oninput="PHASES[${i}].minutes=parseInt(this.value,10)||1; renderPhaseButtons();">
+      <input type="number" value="${p.minutes}" min="1" oninput="PHASES[${i}].minutes=parseInt(this.value,10)||1; renderPhaseEditor(); renderPhaseButtons();">
       <span class="unit">Min.</span>
       <button class="btn-small" onclick="removePhase(${i})">✕</button>
     </div>`).join('');
 }
-function addPhase() { PHASES.push({ name:'Neue Phase', minutes:5 }); renderPhaseEditor(); renderPhaseButtons(); scheduleSave(); }
+function addPhase() { PHASES.push({ name:'Neue Phase', minutes:5, start:'', log:[] }); renderPhaseEditor(); renderPhaseButtons(); scheduleSave(); }
 function removePhase(i) {
   if (liveState.activeIdx === i) stopPhase();
   else if (liveState.activeIdx !== null && liveState.activeIdx > i) liveState.activeIdx--;
@@ -962,6 +982,7 @@ function applyImport(raw) {
       name: String(p.name || 'Phase'),
       minutes: parseInt(p.minuten != null ? p.minuten : p.minutes, 10) || 5,
       impuls: p.impuls ? String(p.impuls) : '',
+      start: p.start ? String(p.start) : '',
       log: []
     }));
     liveState.activeIdx = null;
@@ -1012,7 +1033,7 @@ function renderPhaseBloecke(){
     <div class="phase-block${aktiv?' aktiv':''}">
       <button class="phase-btn${aktiv?' running':''}" onclick="startPhase(${i})">
         <span>${escHtml(p.name)}</span>
-        <span class="planned">${aktiv?'<span id="laufUhr">00:00</span> / ':''}${p.minutes} Min.</span>
+        <span class="planned">${aktiv?'<span id="laufUhr">00:00</span> / ':''}${startZeit(i)?startZeit(i)+' / ':''}${p.minutes} Min.</span>
       </button>
       ${p.impuls?`<div class="phase-impuls">${escHtml(p.impuls)}</div>`:''}
       ${aktiv?`
