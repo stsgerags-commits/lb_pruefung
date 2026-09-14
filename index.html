@@ -194,6 +194,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-s
 .q-meta { font-size: 11px; color: #888; margin-top: 4px; }
 .q-note { width: 100%; margin-top: 6px; padding: 7px 9px; font-size: 12px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; resize: vertical; min-height: 44px; }
 
+.phase-block { border: 1px solid #eee; border-radius: 10px; padding: 10px; margin-bottom: 10px; background: #fff; }
+.phase-block.aktiv { border-color: #2E86C1; box-shadow: 0 0 0 3px rgba(46,134,193,0.10); }
+.phase-block .phase-btn { margin-bottom: 6px; }
+.phase-inner { border-top: 1px solid #f0f0f0; padding-top: 10px; margin-top: 6px; }
+.phase-kurz { font-size: 11px; color: #8a9aa8; padding-left: 2px; }
+.exp-titel { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #2E86C1; margin: 14px 0 6px; }
 .phase-impuls { font-size: 11px; color: #7a8a99; margin: -4px 0 10px 2px; line-height: 1.5; }
 
 @media (max-width: 560px) {
@@ -237,6 +243,18 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-s
     </div>
 
     <div class="section">
+      <div class="section-header"><span class="section-title">Verständnisfragen Nachgespräch</span></div>
+      <div id="qList" style="padding:14px 16px;"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><span class="section-title">Aussagen der LAA im Prüfungsgespräch</span></div>
+      <div class="reflexion-freitext" style="border-bottom:none;">
+        <textarea id="reflexionFreitext" placeholder="Wörtliche oder sinngemäße Aussagen der LAA während der Reflexion — als Abgleich zur eigenen Beobachtung. Wird im PDF-Export mit ausgegeben."></textarea>
+      </div>
+    </div>
+
+    <div class="section">
       <div class="section-header"><span class="section-title">Anforderung: Planung</span><span class="section-badge" id="badge-planung">nicht bewertet</span></div>
       <div id="criteria-planung"></div>
     </div>
@@ -246,10 +264,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-s
     </div>
     <div class="section">
       <div class="section-header"><span class="section-title">Anforderung: Reflexion</span><span class="section-badge" id="badge-reflexion">nicht bewertet</span></div>
-      <div class="reflexion-freitext">
-        <label>Aussagen der LAA im Prüfungsgespräch (Freitext)</label>
-        <textarea id="reflexionFreitext" placeholder="Wörtliche oder sinngemäße Aussagen der LAA während der Reflexion — als Abgleich zur eigenen Beobachtung, wird im PDF-Export unter Reflexion mit ausgegeben."></textarea>
-      </div>
       <div id="criteria-reflexion"></div>
     </div>
 
@@ -280,30 +294,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-s
     </div>
 
     <div class="panel">
-      <div class="panel-title">Live-Timer</div>
-      <div class="live-clock" id="liveClock">00:00</div>
-      <div class="live-status" id="liveStatus">Keine Phase gestartet.</div>
-      <div id="phaseButtons"></div>
-      <button class="btn-small" onclick="stopPhase()">Timer stoppen</button>
-    </div>
-
-    <div class="panel">
-      <div class="panel-title">Protokoll</div>
-      <div class="note-input-row">
-        <input type="text" id="quickNote" placeholder="Kurznotiz zur aktuellen Phase…" onkeydown="if(event.key==='Enter')addNote()">
-        <button class="btn-small" onclick="addNote()">Notiz erfassen</button>
-      </div>
-      <div class="protocol-log" id="protocolLog"></div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-title">Erwartungen aus dem Entwurf — Abgleich</div>
-      <div id="expList"></div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-title">Verständnisfragen Nachgespräch</div>
-      <div id="qList"></div>
+      <div class="panel-title">Unterrichtsverlauf</div>
+      <div class="live-status" id="liveStatus">Auf eine Phase tippen, um die Zeit zu starten.</div>
+      <div id="phaseBloecke"></div>
+      <button class="btn-small" onclick="stopPhase()">Laufende Phase beenden</button>
     </div>
 
     <button class="btn-primary" onclick="showView('bewertung')">Zur Bewertung →</button>
@@ -851,20 +845,16 @@ th{background:#2E86C1;color:#fff;padding:7px;text-align:left;}td{padding:5px 7px
 </table>
 ${reflexionFreitext ? `<div style="margin:0 0 14px;padding:10px 12px;background:#fbfcfd;border:1px solid #eee;border-radius:6px;font-size:12px;"><strong>Aussagen der LAA im Prüfungsgespräch:</strong><div style="white-space:pre-wrap;margin-top:6px;line-height:1.6;">${esc(reflexionFreitext)}</div></div>` : ''}
 ${(typeof ERWARTUNGEN !== 'undefined' && ERWARTUNGEN.length) ? `<h2>Erwartungen aus dem Entwurf — Abgleich</h2>
-<table><tr><th style="width:70px;">Art</th><th>Erwartung</th><th style="width:80px;">Status</th><th>Beobachtung</th></tr>
-${ERWARTUNGEN.map(e => `<tr><td>${e.art==='irritation'?'Irritation':'Stärke'}</td><td>${esc(e.text)}${e.beleg?`<div style="font-size:10.5px;color:#777;font-style:italic;margin-top:3px;">${esc(e.beleg)}</div>`:''}</td><td>${e.status==='bestaetigt'?'bestätigt':(e.status==='widerlegt'?'widerlegt':'offen')}</td><td style="font-size:11px;">${esc(e.notiz||'')}</td></tr>`).join('')}
+<table><tr><th style="width:70px;">Art</th><th>Erwartung</th><th style="width:80px;">Status</th><th style="width:110px;">Phase</th><th>Beobachtung</th></tr>
+${ERWARTUNGEN.map(e => `<tr><td>${e.art==='irritation'?'Irritation':'Stärke'}</td><td>${esc(e.text)}${e.beleg?`<div style="font-size:10.5px;color:#777;font-style:italic;margin-top:3px;">${esc(e.beleg)}</div>`:''}</td><td>${e.status==='bestaetigt'?'bestätigt':(e.status==='widerlegt'?'widerlegt':'offen')}</td><td style="font-size:11px;">${esc(e.phase||'')}</td><td style="font-size:11px;">${esc(e.notiz||'')}</td></tr>`).join('')}
 </table>` : ''}
 ${(typeof FRAGEN !== 'undefined' && FRAGEN.length) ? `<h2>Verständnisfragen Nachgespräch</h2>
 <table><tr><th style="width:22px;"></th><th>Frage</th><th>Notiz</th></tr>
 ${FRAGEN.map(f => `<tr><td style="text-align:center;">${f.gestellt?'✓':''}</td><td>${esc(f.frage)}${(f.schritt||f.theorie)?`<div style="font-size:10.5px;color:#777;margin-top:3px;">${esc([f.schritt,f.theorie].filter(Boolean).join(' · '))}</div>`:''}</td><td style="font-size:11px;">${esc(f.notiz||'')}</td></tr>`).join('')}
 </table>` : ''}
-${(typeof liveState !== 'undefined' && liveState.log && liveState.log.length) ? `<h2>Protokoll der Unterrichtsstunde</h2>
-<table><tr><th style="width:70px;">Zeit</th><th>Eintrag</th></tr>
-${liveState.log.map(e => `<tr><td>${esc(e.time)}</td><td>${esc(e.text)}</td></tr>`).join('')}
-</table>` : ''}
-${(typeof PHASES !== 'undefined' && PHASES.length) ? `<h2>Geplante Phasen</h2>
-<table><tr><th>Phase</th><th style="width:70px;">Geplant</th><th>Beobachtungsimpuls</th></tr>
-${PHASES.map(ph => `<tr><td>${esc(ph.name)}</td><td>${ph.minutes} Min.</td><td style="font-size:11px;">${esc(ph.impuls||'')}</td></tr>`).join('')}
+${(typeof PHASES !== 'undefined' && PHASES.length) ? `<h2>Unterrichtsverlauf</h2>
+<table><tr><th style="width:26%;">Phase</th><th style="width:60px;">Geplant</th><th>Beobachtungsimpuls und Bemerkungen</th></tr>
+${PHASES.map(ph => `<tr><td>${esc(ph.name)}</td><td>${ph.minutes} Min.</td><td style="font-size:11px;">${ph.impuls?`<em>${esc(ph.impuls)}</em>`:''}${(ph.log&&ph.log.length)?`<div style="margin-top:4px;">${ph.log.map(e=>`${esc(e.time)} &nbsp; ${esc(e.text)}`).join('<br>')}</div>`:''}</td></tr>`).join('')}
 </table>` : ''}
 <h2>Worturteil</h2><div class="worturteil">${esc(worturteil)}</div>
 <div class="sig"><div>Datum: ___________________</div><div>Unterschrift: ___________________</div></div>
@@ -888,6 +878,9 @@ Grundlagen: ThürAZStPLVO vom 26. April 2016 (GVBl. S. 180) · Standardisiertes 
    Phasenmodell je nach Entwurf variiert (5E, Einstieg/Erarbeitung/
    Sicherung/Reflexion, o.ä.) und nicht in der App vorgegeben wird.
    ------------------------------------------------------------------ */
+let ERWARTUNGEN = [];   // Erwartungen aus der Entwurfsanalyse
+let FRAGEN = [];        // Verständnisfragen für das Nachgespräch
+
 let PHASES = [
   { name:'Einstieg', minutes:5 },
   { name:'Erarbeitung', minutes:15 },
@@ -924,154 +917,14 @@ function removePhase(i) {
   renderPhaseEditor(); renderPhaseButtons(); scheduleSave();
 }
 
-function renderPhaseButtons() {
-  document.getElementById('phaseButtons').innerHTML = PHASES.map((p,i) => `
-    <button class="phase-btn${liveState.activeIdx===i?' running':''}" onclick="startPhase(${i})">
-      <span>${escHtml(p.name)}</span><span class="planned">${p.minutes} Min. geplant</span>
-    </button>` + (p.impuls ? `<div class="phase-impuls">${escHtml(p.impuls)}</div>` : '')).join('');
-}
-
-function startPhase(i) {
-  if (liveState.activeIdx !== null) logPhaseEnd();
-  liveState.activeIdx = i;
-  liveState.phaseStart = Date.now();
-  if (!liveState.timerHandle) liveState.timerHandle = setInterval(tickClock, 500);
-  renderPhaseButtons();
-  tickClock();
-}
-function stopPhase() {
-  if (liveState.activeIdx !== null) logPhaseEnd();
-  liveState.activeIdx = null;
-  clearInterval(liveState.timerHandle);
-  liveState.timerHandle = null;
-  const clock = document.getElementById('liveClock');
-  clock.textContent = '00:00'; clock.classList.remove('overrun');
-  const status = document.getElementById('liveStatus');
-  status.textContent = 'Keine Phase gestartet.'; status.classList.remove('overrun');
-  renderPhaseButtons();
-}
-function logPhaseEnd() {
-  const p = PHASES[liveState.activeIdx];
-  const elapsedSec = Math.round((Date.now() - liveState.phaseStart) / 1000);
-  const diff = elapsedSec - p.minutes * 60;
-  const diffText = diff > 0 ? ` (überzogen um ${fmtTime(diff)})` : '';
-  liveState.log.push({ time: nowLabel(), text: `Phase „${p.name}“ beendet nach ${fmtTime(elapsedSec)}${diffText}` });
-  renderLog(); scheduleSave();
-}
-function tickClock() {
-  if (liveState.activeIdx === null) return;
-  const p = PHASES[liveState.activeIdx];
-  const elapsedSec = Math.round((Date.now() - liveState.phaseStart) / 1000);
-  const plannedSec = p.minutes * 60;
-  const clock = document.getElementById('liveClock');
-  const status = document.getElementById('liveStatus');
-  clock.textContent = fmtTime(elapsedSec);
-  if (elapsedSec > plannedSec) {
-    clock.classList.add('overrun');
-    status.classList.add('overrun');
-    status.textContent = `„${p.name}“ überzogen um ${fmtTime(elapsedSec - plannedSec)}`;
-  } else {
-    clock.classList.remove('overrun');
-    status.classList.remove('overrun');
-    status.textContent = `„${p.name}“ läuft · geplant ${p.minutes}:00`;
-  }
-}
-function addNote() {
-  const input = document.getElementById('quickNote');
-  const text = input.value.trim();
-  if (!text) return;
-  const phaseName = liveState.activeIdx !== null ? PHASES[liveState.activeIdx].name : 'ohne aktive Phase';
-  liveState.log.push({ time: nowLabel(), text: `[${phaseName}] ${text}` });
-  input.value = '';
-  renderLog(); scheduleSave();
-}
-function renderLog() {
-  const c = document.getElementById('protocolLog');
-  if (!liveState.log.length) { c.innerHTML = '<span class="protocol-empty">Noch keine Einträge.</span>'; return; }
-  c.innerHTML = liveState.log.slice().reverse().map(e =>
-    `<div class="protocol-entry"><span class="ts">${e.time}</span>${escHtml(e.text)}</div>`).join('');
-}
 /* ------------------------------------------------------------------
-   Import der Entwurfsanalyse (JSON) — erzeugt aus der Claude-Analyse.
-   Erwartetes Schema (alle Felder optional):
-   {
-     "meta":    { "laaName":"", "fachThema":"", "klasse":"", "datum":"JJJJ-MM-TT" },
-     "phasen":  [ { "name":"Einstieg", "minuten":5, "impuls":"Beobachtungsimpuls" } ],
-     "erwartungen": [ { "art":"staerke"|"irritation", "text":"", "beleg":"" } ],
-     "fragen":  [ { "frage":"", "schritt":"Beobachtung", "theorie":"Helmke" } ]
-   }
+   Import der Entwurfsanalyse (JSON).
+   Schema: meta / phasen / erwartungen / fragen — alle Felder optional.
    Bewertungen werden bewusst NICHT importiert.
    ------------------------------------------------------------------ */
-let ERWARTUNGEN = [];
-let FRAGEN = [];
-
-/* ------------------------------------------------------------------
-   Sicherung: vollständiger Arbeitsstand einer Prüfung als JSON-Datei.
-   Enthält Bewertungen, Protokoll, Erwartungen, Fragen und Worturteil —
-   im Unterschied zur Entwurfs-JSON, die nur die Analyse einspeist.
-   ------------------------------------------------------------------ */
-function dateiName() {
-  const n = (document.getElementById('laaName').value || 'Pruefung').trim()
-              .replace(/[^A-Za-z0-9ÄÖÜäöüß -]/g, '').replace(/\s+/g, '_');
-  const d = (document.getElementById('datum').value || '').trim();
-  return 'Sicherung_' + n + (d ? '_' + d : '') + '.json';
-}
-
-function sicherungExport() {
-  let daten;
-  try { daten = collectState(); }
-  catch (e) { alert('Der Arbeitsstand konnte nicht gelesen werden.'); return; }
-  daten.formatVersion = 'lb-sicherung-1';
-  const text = JSON.stringify(daten, null, 2);
-  try {
-    const blob = new Blob([text], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = dateiName();
-    document.body.appendChild(a); a.click();
-    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
-  } catch (e) {
-    /* Rückfall, falls der Download nicht möglich ist: Text zum Kopieren anzeigen */
-    const feld = document.getElementById('importPaste');
-    if (feld) { feld.value = text; showView('live'); }
-    alert('Der Download ist hier nicht möglich. Die Sicherung steht zum Kopieren im Einfügefeld unter Live-Beobachtung.');
-  }
-}
-
-function sicherungDateiLesen(file) {
-  if (!file) return;
-  const r = new FileReader();
-  r.onload = e => sicherungEinlesen(e.target.result);
-  r.onerror = () => alert('Die Datei konnte nicht gelesen werden.');
-  r.readAsText(file);
-}
-
-function sicherungEinlesen(roh) {
-  let d;
-  try { d = JSON.parse(roh); }
-  catch (e) { alert('Kein gültiges JSON: ' + e.message); return; }
-  if (!d || !d.meta || !d.scores) {
-    alert('Das ist keine Sicherungsdatei dieser App. Eine Entwurfsanalyse wird unter Live-Beobachtung eingelesen.');
-    return;
-  }
-  const bez = (d.meta.laaName || 'ohne Namen') + (d.meta.datum ? ', ' + d.meta.datum : '');
-  if (!confirm('Sicherung von „' + bez + '" als neue Prüfung anlegen? Der aktuelle Stand bleibt erhalten.')) return;
-  saveState();
-  const neueAkte = neueId();
-  try {
-    localStorage.setItem(schluessel(neueAkte), JSON.stringify(d));
-    localStorage.setItem(AKTIV_KEY, neueAkte);
-  } catch (e) { alert('Die Sicherung konnte nicht gespeichert werden.'); return; }
-  location.reload();
-}
-
-function importAusFeld() {
-  const t = document.getElementById('importPaste').value.trim();
-  if (!t) { importStatus('Das Einfügefeld ist leer.', false); return; }
-  applyImport(t);
-}
 function importStatus(msg, ok) {
   const el = document.getElementById('importStatus');
+  if(!el) return;
   el.className = 'import-status shown ' + (ok ? 'ok' : 'err');
   el.textContent = msg;
 }
@@ -1082,6 +935,12 @@ function handleImportFile(file) {
   reader.onload = e => applyImport(e.target.result);
   reader.onerror = () => importStatus('Datei konnte nicht gelesen werden.', false);
   reader.readAsText(file);
+}
+
+function importAusFeld() {
+  const t = document.getElementById('importPaste').value.trim();
+  if (!t) { importStatus('Das Einfügefeld ist leer.', false); return; }
+  applyImport(t);
 }
 
 function applyImport(raw) {
@@ -1102,8 +961,10 @@ function applyImport(raw) {
     PHASES = d.phasen.map(p => ({
       name: String(p.name || 'Phase'),
       minutes: parseInt(p.minuten != null ? p.minuten : p.minutes, 10) || 5,
-      impuls: p.impuls ? String(p.impuls) : ''
+      impuls: p.impuls ? String(p.impuls) : '',
+      log: []
     }));
+    liveState.activeIdx = null;
     done.push(PHASES.length + ' Phasen');
   }
 
@@ -1112,7 +973,7 @@ function applyImport(raw) {
       art: (e.art === 'irritation') ? 'irritation' : 'staerke',
       text: String(e.text || ''),
       beleg: e.beleg ? String(e.beleg) : '',
-      status: null, notiz: ''
+      status: null, phase: '', notiz: ''
     }));
     done.push(ERWARTUNGEN.length + ' Erwartungen');
   }
@@ -1127,53 +988,157 @@ function applyImport(raw) {
     done.push(FRAGEN.length + ' Fragen');
   }
 
-  if (!done.length) { importStatus('JSON gelesen, aber keine bekannten Felder gefunden (meta, phasen, erwartungen, fragen).', false); return; }
+  if (!done.length) {
+    importStatus('JSON gelesen, aber keine bekannten Felder gefunden (meta, phasen, erwartungen, fragen).', false);
+    return;
+  }
 
   renderLive();
   scheduleSave();
   importStatus('Importiert: ' + done.join(' · ') + '. Bewertungen wurden nicht verändert.', true);
 }
 
-function renderErwartungen() {
-  const c = document.getElementById('expList');
-  if (!ERWARTUNGEN.length) { c.innerHTML = '<span class="protocol-empty">Keine Erwartungen importiert.</span>'; return; }
-  c.innerHTML = ERWARTUNGEN.map((e,i) => `
-    <div class="exp-item">
-      <div class="exp-head">
-        <span class="exp-kind ${e.art}">${e.art === 'irritation' ? 'Irritation' : 'Stärke'}</span>
-        <div class="exp-text">${escHtml(e.text)}
-          ${e.beleg ? `<div class="exp-beleg">Entwurfsbeleg: ${escHtml(e.beleg)}</div>` : ''}</div>
-      </div>
-      <div class="exp-actions">
-        <button class="exp-btn${e.status==='bestaetigt'?' on-conf':''}" onclick="setExp(${i},'bestaetigt')">bestätigt</button>
-        <button class="exp-btn${e.status==='widerlegt'?' on-wid':''}" onclick="setExp(${i},'widerlegt')">widerlegt</button>
-        <button class="exp-btn" onclick="setExp(${i},null)">offen</button>
-      </div>
-      <textarea class="exp-note" placeholder="Beobachtungsnotiz" oninput="ERWARTUNGEN[${i}].notiz=this.value; scheduleSave();">${escHtml(e.notiz)}</textarea>
-    </div>`).join('');
-}
-function setExp(i, status) {
-  ERWARTUNGEN[i].status = (ERWARTUNGEN[i].status === status) ? null : status;
-  renderErwartungen(); scheduleSave();
+function renderPhaseButtons(){ renderPhaseBloecke(); }
+
+/* Ein Block je Phase. Die laufende Phase ist aufgeklappt und zeigt
+   Beobachtungsimpuls, eigenes Protokoll und den Erwartungsabgleich. */
+function renderPhaseBloecke(){
+  const c=document.getElementById('phaseBloecke');
+  if(!c) return;
+  c.innerHTML=PHASES.map((p,i)=>{
+    const aktiv = liveState.activeIdx===i;
+    const eintraege = (p.log||[]);
+    return `
+    <div class="phase-block${aktiv?' aktiv':''}">
+      <button class="phase-btn${aktiv?' running':''}" onclick="startPhase(${i})">
+        <span>${escHtml(p.name)}</span>
+        <span class="planned">${aktiv?'<span id="laufUhr">00:00</span> / ':''}${p.minutes} Min.</span>
+      </button>
+      ${p.impuls?`<div class="phase-impuls">${escHtml(p.impuls)}</div>`:''}
+      ${aktiv?`
+        <div class="phase-inner">
+          <div class="note-input-row">
+            <input type="text" id="quickNote" placeholder="Bemerkung zu dieser Phase…" onkeydown="if(event.key==='Enter')addNote()">
+            <button class="btn-small" onclick="addNote()">Erfassen</button>
+          </div>
+          ${eintraege.length?`<div class="protocol-log">${eintraege.slice().reverse().map(e=>
+            `<div class="protocol-entry"><span class="ts">${escHtml(e.time)}</span>${escHtml(e.text)}</div>`).join('')}</div>`
+            :'<div class="protocol-empty">Noch keine Bemerkung.</div>'}
+          <div class="exp-titel">Erwartungen abgleichen</div>
+          <div>${erwartungenHtml(i)}</div>
+        </div>`
+      :(eintraege.length?`<div class="phase-kurz">${eintraege.length} Bemerkung${eintraege.length===1?'':'en'} erfasst</div>`:'')}
+    </div>`;
+  }).join('');
 }
 
-function renderFragen() {
-  const c = document.getElementById('qList');
-  if (!FRAGEN.length) { c.innerHTML = '<span class="protocol-empty">Keine Fragen importiert.</span>'; return; }
-  c.innerHTML = FRAGEN.map((f,i) => `
+function erwartungenHtml(phaseIdx){
+  if(!ERWARTUNGEN.length) return '<span class="protocol-empty">Keine Erwartungen importiert.</span>';
+  return ERWARTUNGEN.map((e,i)=>`
+    <div class="exp-item">
+      <div class="exp-head">
+        <span class="exp-kind ${e.art}">${e.art==='irritation'?'Irritation':'Stärke'}</span>
+        <div class="exp-text">${escHtml(e.text)}
+          ${e.beleg?`<div class="exp-beleg">Entwurfsbeleg: ${escHtml(e.beleg)}</div>`:''}
+          ${e.phase?`<div class="exp-beleg">markiert in: ${escHtml(e.phase)}</div>`:''}</div>
+      </div>
+      <div class="exp-actions">
+        <button class="exp-btn${e.status==='bestaetigt'?' on-conf':''}" onclick="setExp(${i},'bestaetigt',${phaseIdx})">bestätigt</button>
+        <button class="exp-btn${e.status==='widerlegt'?' on-wid':''}" onclick="setExp(${i},'widerlegt',${phaseIdx})">widerlegt</button>
+        <button class="exp-btn" onclick="setExp(${i},null,${phaseIdx})">offen</button>
+      </div>
+      <textarea class="exp-note" placeholder="Beobachtungsnotiz" oninput="ERWARTUNGEN[${i}].notiz=this.value; scheduleSave();">${escHtml(e.notiz||'')}</textarea>
+    </div>`).join('');
+}
+
+function setExp(i,status,phaseIdx){
+  const e=ERWARTUNGEN[i];
+  if(e.status===status){ e.status=null; e.phase=''; }
+  else { e.status=status; e.phase = status ? (PHASES[phaseIdx]?PHASES[phaseIdx].name:'') : ''; }
+  renderPhaseBloecke(); scheduleSave();
+}
+
+function startPhase(i){
+  if(liveState.activeIdx!==null && liveState.activeIdx!==i) logPhaseEnd();
+  if(liveState.activeIdx===i) return;          // laufende Phase nicht neu starten
+  liveState.activeIdx=i;
+  liveState.phaseStart=Date.now();
+  if(!PHASES[i].log) PHASES[i].log=[];
+  PHASES[i].log.push({time:nowLabel(),text:'Phase begonnen'});
+  if(!liveState.timerHandle) liveState.timerHandle=setInterval(tickClock,500);
+  renderPhaseBloecke(); tickClock(); scheduleSave();
+}
+
+function stopPhase(){
+  if(liveState.activeIdx!==null) logPhaseEnd();
+  liveState.activeIdx=null;
+  clearInterval(liveState.timerHandle); liveState.timerHandle=null;
+  const st=document.getElementById('liveStatus');
+  st.textContent='Keine Phase läuft.'; st.classList.remove('overrun');
+  renderPhaseBloecke(); scheduleSave();
+}
+
+/* Beim Wechsel wird die vergangene Zeit in die Bemerkungen der
+   beendeten Phase geschrieben. */
+function logPhaseEnd(){
+  const p=PHASES[liveState.activeIdx];
+  if(!p) return;
+  const sek=Math.round((Date.now()-liveState.phaseStart)/1000);
+  const diff=sek-p.minutes*60;
+  const zusatz = diff>0 ? ' — überzogen um '+fmtTime(diff)
+                        : (diff<0 ? ' — '+fmtTime(-diff)+' unter der Planung' : ' — punktgenau');
+  if(!p.log) p.log=[];
+  p.log.push({time:nowLabel(),text:'Phase beendet nach '+fmtTime(sek)+' von '+p.minutes+':00'+zusatz});
+}
+
+function tickClock(){
+  if(liveState.activeIdx===null) return;
+  const p=PHASES[liveState.activeIdx];
+  const sek=Math.round((Date.now()-liveState.phaseStart)/1000);
+  const plan=p.minutes*60;
+  const uhr=document.getElementById('laufUhr');
+  if(uhr) uhr.textContent=fmtTime(sek);
+  const st=document.getElementById('liveStatus');
+  if(sek>plan){ st.classList.add('overrun');
+    st.textContent='„'+p.name+'" überzogen um '+fmtTime(sek-plan); }
+  else { st.classList.remove('overrun');
+    st.textContent='„'+p.name+'" läuft · geplant '+p.minutes+':00'; }
+}
+
+function addNote(){
+  const f=document.getElementById('quickNote');
+  if(!f) return;
+  const t=f.value.trim();
+  if(!t) return;
+  if(liveState.activeIdx===null){ alert('Bitte zuerst eine Phase starten.'); return; }
+  const p=PHASES[liveState.activeIdx];
+  if(!p.log) p.log=[];
+  p.log.push({time:nowLabel(),text:t});
+  f.value='';
+  renderPhaseBloecke(); scheduleSave();
+}
+
+function renderLog(){ renderPhaseBloecke(); }
+
+/* Verständnisfragen stehen im Reiter Bewertung, oberhalb der Anforderungen. */
+function renderFragen(){
+  const c=document.getElementById('qList');
+  if(!c) return;
+  if(!FRAGEN.length){ c.innerHTML='<span class="protocol-empty">Keine Fragen importiert.</span>'; return; }
+  c.innerHTML=FRAGEN.map((f,i)=>`
     <div class="q-item">
       <div class="q-top">
         <input type="checkbox" ${f.gestellt?'checked':''} onchange="FRAGEN[${i}].gestellt=this.checked; scheduleSave();">
         <div>
           <div class="q-text">${escHtml(f.frage)}</div>
-          ${(f.schritt || f.theorie) ? `<div class="q-meta">${escHtml([f.schritt, f.theorie].filter(Boolean).join(' · '))}</div>` : ''}
+          ${(f.schritt||f.theorie)?`<div class="q-meta">${escHtml([f.schritt,f.theorie].filter(Boolean).join(' · '))}</div>`:''}
         </div>
       </div>
-      <textarea class="q-note" placeholder="Antwort der LAA / Notiz" oninput="FRAGEN[${i}].notiz=this.value; scheduleSave();">${escHtml(f.notiz)}</textarea>
+      <textarea class="q-note" placeholder="Antwort der LAA / Notiz" oninput="FRAGEN[${i}].notiz=this.value; scheduleSave();">${escHtml(f.notiz||'')}</textarea>
     </div>`).join('');
 }
 
-function renderLive() { renderPhaseEditor(); renderPhaseButtons(); renderLog(); renderErwartungen(); renderFragen(); }
+function renderLive() { renderPhaseEditor(); renderPhaseBloecke(); renderFragen(); }
 
 /* ------------------------------------------------------------------
    Datenverlustschutz: gesamter Arbeitsstand wird bei jeder Änderung
