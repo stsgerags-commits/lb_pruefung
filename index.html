@@ -831,7 +831,13 @@ th{background:#2E86C1;color:#fff;padding:7px;text-align:left;}td{padding:5px 7px
 .worturteil{line-height:1.85;white-space:pre-wrap;font-size:13px;}
 .footer{margin-top:34px;border-top:1px solid #ccc;padding-top:12px;font-size:10.5px;color:#777;line-height:1.6;}
 .sig{display:flex;justify-content:space-between;margin-top:36px;font-size:12px;color:#1a1a1a;}
-@media print{body{margin:1.5cm;}}</style></head><body>
+.druckleiste{position:sticky;top:0;background:#fff;border-bottom:1px solid #ddd;padding:10px 0 12px;margin-bottom:14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;}.druckleiste button{padding:9px 16px;font-size:14px;border:none;border-radius:8px;background:#2E86C1;color:#fff;cursor:pointer;}.druckleiste span{font-size:12px;color:#666;}@media print{body{margin:1.5cm;}}.no-print{}@media print{.no-print{display:none !important;}}</style></head><body>
+<div class="druckleiste no-print">
+  <button onclick="window.print()">Drucken / In Dateien sichern</button>
+  <span>Im Druckdialog auf „In Dateien sichern“ oder „PDF“ wählen.</span>
+</div>
+<script>window.addEventListener('load', function(){ setTimeout(function(){ try{ window.print(); }catch(e){} }, 400); });<\/script>
+
 <h1>Worturteil – Praktische Prüfung</h1>
 <p style="color:#666;font-size:12px;">Staatliches Studienseminar für Lehrerausbildung · Standardisiertes Leistungsbild zur praktischen Prüfung (Stand 13.12.13)</p>
 <div class="meta">
@@ -880,10 +886,14 @@ Grundlagen: ThürAZStPLVO vom 26. April 2016 (GVBl. S. 180) · Standardisiertes 
 </div>
 </body></html>`;
 
-  const blob = new Blob([html], {type:'text/html'});
-  const url = URL.createObjectURL(blob);
-  const win = window.open(url, '_blank');
-  if (win) win.onload = () => setTimeout(() => win.print(), 600);
+  /* Der Inhalt wird direkt in das neue Fenster geschrieben. Eine
+     blob:-Adresse wäre kein Dokument — iOS bietet dafür kein
+     „In Dateien sichern" an. So greift der reguläre Druckdialog. */
+  const win = window.open('', '_blank');
+  if (!win) { alert('Das Fenster wurde blockiert. Bitte Pop-ups für diese Seite erlauben.'); return; }
+  win.document.open();
+  win.document.write(html);
+  win.document.close();
 }
 
 /* ------------------------------------------------------------------
