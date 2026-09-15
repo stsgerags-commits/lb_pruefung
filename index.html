@@ -188,6 +188,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-s
 .exp-btn.on-wid { background: #A32D2D; border-color: #A32D2D; color: #fff; }
 .exp-note { width: 100%; margin-top: 6px; padding: 7px 9px; font-size: 12px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; resize: vertical; min-height: 44px; }
 
+.eigen-marke { display:inline-block; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; background:#e6f0f9; color:#1F618D; border-radius:9px; padding:1px 7px; margin-left:4px; vertical-align:2px; }
+.eigen-weg { font-size:11px; color:#a05050; cursor:pointer; text-decoration:underline; margin-left:4px; }
 .q-item { border-bottom: 1px solid #f0f0f0; padding: 12px 0; }
 .q-item:last-child { border-bottom: none; }
 .q-top { display: flex; gap: 10px; align-items: flex-start; }
@@ -254,6 +256,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-s
     <div class="section">
       <div class="section-header"><span class="section-title">Verständnisfragen Nachgespräch</span></div>
       <div id="qList" style="padding:14px 16px;"></div>
+      <div class="note-input-row" style="padding:0 16px 14px;">
+        <input type="text" id="frageNeu" placeholder="Eigene Frage ergänzen …" onkeydown="if(event.key==='Enter')frageHinzu()">
+        <button class="btn-small" onclick="frageHinzu()">Hinzufügen</button>
+      </div>
     </div>
 
     <div class="section">
@@ -851,10 +857,15 @@ ${(typeof ERWARTUNGEN !== 'undefined' && ERWARTUNGEN.length) ? `<h2>Erwartungen 
 <table><tr><th style="width:70px;">Art</th><th>Erwartung</th><th style="width:80px;">Status</th><th style="width:110px;">Phase</th><th>Beobachtung</th></tr>
 ${ERWARTUNGEN.map(e => `<tr><td>${e.art==='irritation'?'Irritation':'Stärke'}</td><td>${esc(e.text)}${e.beleg?`<div style="font-size:10.5px;color:#777;font-style:italic;margin-top:3px;">${esc(e.beleg)}</div>`:''}</td><td>${e.status==='bestaetigt'?'bestätigt':(e.status==='widerlegt'?'widerlegt':'offen')}</td><td style="font-size:11px;">${esc(e.phase||'')}</td><td style="font-size:11px;">${esc(e.notiz||'')}</td></tr>`).join('')}
 </table>` : ''}
-${(typeof FRAGEN !== 'undefined' && FRAGEN.length) ? `<h2>Verständnisfragen Nachgespräch</h2>
-<table><tr><th style="width:22px;"></th><th>Frage</th><th>Notiz</th></tr>
-${FRAGEN.map(f => `<tr><td style="text-align:center;">${f.gestellt?'✓':''}</td><td>${esc(f.frage)}${(f.schritt||f.theorie)?`<div style="font-size:10.5px;color:#777;margin-top:3px;">${esc([f.schritt,f.theorie].filter(Boolean).join(' · '))}</div>`:''}</td><td style="font-size:11px;">${esc(f.notiz||'')}</td></tr>`).join('')}
-</table>` : ''}
+${(() => {
+  if (typeof FRAGEN === 'undefined') return '';
+  const gestellt = FRAGEN.filter(f => f.gestellt);
+  if (!gestellt.length) return '';
+  return `<h2>Gestellte Verständnisfragen</h2>
+<table><tr><th>Frage</th><th style="width:40%;">Notiz</th></tr>
+${gestellt.map(f => `<tr><td>${esc(f.frage)}${f.eigen?' <span style="font-size:10px;color:#1F618D;">(eigene Frage)</span>':''}${(f.schritt||f.theorie)?`<div style="font-size:10.5px;color:#777;margin-top:3px;">${esc([f.schritt,f.theorie].filter(Boolean).join(' · '))}</div>`:''}</td><td style="font-size:11px;">${esc(f.notiz||'')}</td></tr>`).join('')}
+</table>`;
+})()}
 ${(typeof PHASES !== 'undefined' && PHASES.length) ? `<h2>Unterrichtsverlauf</h2>
 <table><tr><th style="width:52px;">Zeit</th><th style="width:24%;">Phase</th><th style="width:56px;">Geplant</th><th>Beobachtungsimpuls und Bemerkungen</th></tr>
 ${PHASES.map((ph,i) => `<tr><td>${esc(startZeit(i))}</td><td>${esc(ph.name)}</td><td>${ph.minutes} Min.</td><td style="font-size:11px;">${ph.impuls?`<em>${esc(ph.impuls)}</em>`:''}${(ph.log&&ph.log.length)?`<div style="margin-top:4px;">${ph.log.map(e=>`${esc(e.time)} &nbsp; ${esc(e.text)}`).join('<br>')}</div>`:''}</td></tr>`).join('')}
@@ -1145,6 +1156,21 @@ function addNote(){
 function renderLog(){ renderPhaseBloecke(); }
 
 /* Verständnisfragen stehen im Reiter Bewertung, oberhalb der Anforderungen. */
+function frageHinzu(){
+  const f=document.getElementById('frageNeu');
+  const t=f.value.trim();
+  if(!t) return;
+  FRAGEN.push({frage:t, schritt:'', theorie:'', gestellt:true, notiz:'', eigen:true});
+  f.value='';
+  renderFragen(); scheduleSave();
+}
+function frageEntfernen(i){
+  if(!FRAGEN[i] || !FRAGEN[i].eigen) return;
+  if(!confirm('Eigene Frage entfernen?')) return;
+  FRAGEN.splice(i,1);
+  renderFragen(); scheduleSave();
+}
+
 function renderFragen(){
   const c=document.getElementById('qList');
   if(!c) return;
@@ -1154,7 +1180,7 @@ function renderFragen(){
       <div class="q-top">
         <input type="checkbox" ${f.gestellt?'checked':''} onchange="FRAGEN[${i}].gestellt=this.checked; scheduleSave();">
         <div>
-          <div class="q-text">${escHtml(f.frage)}</div>
+          <div class="q-text">${escHtml(f.frage)}${f.eigen?' <span class="eigen-marke">eigene Frage</span> <span class="eigen-weg" onclick="frageEntfernen('+i+')">entfernen</span>':''}</div>
           ${(f.schritt||f.theorie)?`<div class="q-meta">${escHtml([f.schritt,f.theorie].filter(Boolean).join(' · '))}</div>`:''}
         </div>
       </div>
