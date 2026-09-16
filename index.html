@@ -800,6 +800,55 @@ Reflexion: ${para(CRITERIA.reflexion)}`;
   document.getElementById('worturteilEdit').value = text;
 }
 
+/* ------------------------------------------------------------------
+   Druckansicht in derselben Seite. Aus dem erzeugten Dokument werden
+   Stilangaben und Rumpf übernommen und als Ebene über der App
+   dargestellt. Der Druckdialog liefert auf dem iPad den Eintrag
+   „In Dateien sichern".
+   ------------------------------------------------------------------ */
+function druckansichtZeigen(html){
+  const cssTreffer  = html.match(/<style>([\s\S]*?)<\/style>/);
+  const bodyTreffer = html.match(/<body>([\s\S]*)<\/body>/);
+  if(!bodyTreffer){ alert('Die Druckansicht konnte nicht aufgebaut werden.'); return; }
+
+  let stil = document.getElementById('druckStil');
+  if(!stil){ stil=document.createElement('style'); stil.id='druckStil'; document.head.appendChild(stil); }
+  stil.textContent = (cssTreffer?cssTreffer[1]:'') + `
+    #druckEbene{position:fixed;inset:0;z-index:9999;background:#fff;overflow:auto;padding:24px;}
+    #druckEbene .druckleiste{position:sticky;top:0;}
+    @media print{
+      body > *:not(#druckEbene){display:none !important;}
+      #druckEbene{position:static;padding:0;overflow:visible;}
+      .no-print{display:none !important;}
+    }`;
+
+  let ebene = document.getElementById('druckEbene');
+  if(!ebene){ ebene=document.createElement('div'); ebene.id='druckEbene'; document.body.appendChild(ebene); }
+  ebene.innerHTML = bodyTreffer[1].replace(/<script[\s\S]*?<\/script>/gi,'');
+
+  /* Schaltflächen der Ebene neu verdrahten, da eingefügte Skripte
+     nicht ausgeführt werden. */
+  const leiste = ebene.querySelector('.druckleiste');
+  if(leiste){
+    const knopf = leiste.querySelector('button');
+    if(knopf) knopf.onclick = () => window.print();
+    const zurueck = document.createElement('button');
+    zurueck.textContent = 'Zurück zur App';
+    zurueck.style.cssText = 'padding:9px 16px;font-size:14px;border:1px solid #ccc;border-radius:8px;background:#fff;color:#444;cursor:pointer;';
+    zurueck.onclick = druckansichtSchliessen;
+    leiste.appendChild(zurueck);
+  }
+  window.scrollTo(0,0);
+  setTimeout(()=>{ try{ window.print(); }catch(e){} }, 400);
+}
+
+function druckansichtSchliessen(){
+  const e=document.getElementById('druckEbene');
+  if(e) e.remove();
+  const s=document.getElementById('druckStil');
+  if(s) s.remove();
+}
+
 function exportPDF() {
   const st = currentState();
   if (!st.complete || !st.wOk) return;
@@ -886,14 +935,11 @@ Grundlagen: ThürAZStPLVO vom 26. April 2016 (GVBl. S. 180) · Standardisiertes 
 </div>
 </body></html>`;
 
-  /* Der Inhalt wird direkt in das neue Fenster geschrieben. Eine
-     blob:-Adresse wäre kein Dokument — iOS bietet dafür kein
-     „In Dateien sichern" an. So greift der reguläre Druckdialog. */
-  const win = window.open('', '_blank');
-  if (!win) { alert('Das Fenster wurde blockiert. Bitte Pop-ups für diese Seite erlauben.'); return; }
-  win.document.open();
-  win.document.write(html);
-  win.document.close();
+  /* Kein neues Fenster: Auf dem iPad werden Pop-ups in einer vom
+     Home-Bildschirm gestarteten App häufig blockiert. Das Dokument
+     wird daher als Ebene über der App angezeigt und von dort
+     gedruckt beziehungsweise in Dateien gesichert. */
+  druckansichtZeigen(html);
 }
 
 /* ------------------------------------------------------------------
