@@ -285,7 +285,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-s
       <div class="import-drop" id="importDrop" onclick="document.getElementById('importFile').click()">
         JSON-Datei hierher ziehen oder klicken zum Auswählen
       </div>
-      <input type="file" id="importFile" style="display:none" onchange="handleImportFile(this.files[0])">
+      <input type="file" id="importFile" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;" onchange="handleImportFile(this.files[0])">
       <div class="import-status" id="importStatus"></div>
       <div style="margin-top:12px;">
         <label style="display:block;font-size:11px;color:#666;margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Alternative: JSON-Text einfügen</label>
@@ -363,7 +363,15 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-s
     <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
       <button class="btn-small" style="flex:1;" onclick="sicherungExport()">Sicherungsdatei erzeugen</button>
       <button class="btn-small" style="flex:1;" onclick="document.getElementById('sicherungFile').click()">Sicherung einlesen</button>
-      <input type="file" id="sicherungFile" style="display:none" onchange="sicherungDateiLesen(this.files[0])">
+      <input type="file" id="sicherungFile" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;" onchange="sicherungDateiLesen(this.files[0])">
+    </div>
+    <div style="margin-top:10px;">
+      <label style="display:block;font-size:11px;color:#666;margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Alternative ohne Dateiauswahl</label>
+      <textarea id="sicherungPaste" placeholder="Sicherungstext hier einfügen, dann auf Übernehmen tippen. Zum Erzeugen „Sicherung hier anzeigen“ nutzen und den Text kopieren." style="width:100%;min-height:80px;padding:10px;font-size:12px;border:1px solid #ddd;border-radius:8px;font-family:ui-monospace,Menlo,monospace;resize:vertical;"></textarea>
+      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+        <button class="btn-small" onclick="sicherungAusFeld()">Übernehmen</button>
+        <button class="btn-small" onclick="sicherungInFeld()">Sicherung hier anzeigen</button>
+      </div>
     </div>
     <div class="weight-note">Die Sicherungsdatei enthält den vollständigen Arbeitsstand dieser Prüfung einschließlich Bewertungen und Protokoll. Sie dient zum Übertragen auf ein anderes Gerät und zum Archivieren, bevor eine Prüfung gelöscht wird.</div>
     </div>
@@ -847,6 +855,78 @@ function druckansichtSchliessen(){
   if(e) e.remove();
   const s=document.getElementById('druckStil');
   if(s) s.remove();
+}
+
+/* ------------------------------------------------------------------
+   Sicherung: vollständiger Arbeitsstand einer Prüfung als JSON-Datei.
+   Enthält Bewertungen, Phasen mit Bemerkungen, Erwartungen, Fragen
+   und Worturteil — im Unterschied zur Entwurfs-JSON, die nur die
+   Analyse einspeist.
+   ------------------------------------------------------------------ */
+function dateiName() {
+  const n = (document.getElementById('laaName').value || 'Pruefung').trim()
+              .replace(/[^A-Za-z0-9ÄÖÜäöüß -]/g, '').replace(/\s+/g, '_');
+  const d = (document.getElementById('datum').value || '').trim();
+  return 'Sicherung_PP_' + n + (d ? '_' + d : '') + '.json';
+}
+
+function sicherungExport() {
+  let daten;
+  try { daten = collectState(); }
+  catch (e) { alert('Der Arbeitsstand konnte nicht gelesen werden.'); return; }
+  daten.formatVersion = 'pp-sicherung-1';
+  const text = JSON.stringify(daten, null, 2);
+  try {
+    const blob = new Blob([text], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = dateiName();
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
+  } catch (e) {
+    const feld = document.getElementById('importPaste');
+    if (feld) { feld.value = text; showView('live'); }
+    alert('Der Download ist hier nicht möglich. Die Sicherung steht zum Kopieren im Einfügefeld unter Live-Beobachtung.');
+  }
+}
+
+function sicherungAusFeld(){
+  const t=document.getElementById('sicherungPaste').value.trim();
+  if(!t){ alert('Das Einfügefeld ist leer.'); return; }
+  sicherungEinlesen(t);
+}
+function sicherungInFeld(){
+  let daten;
+  try{ daten=collectState(); }catch(e){ alert('Der Arbeitsstand konnte nicht gelesen werden.'); return; }
+  daten.formatVersion='pp-sicherung-1';
+  document.getElementById('sicherungPaste').value=JSON.stringify(daten,null,2);
+}
+
+function sicherungDateiLesen(file) {
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = e => sicherungEinlesen(e.target.result);
+  r.onerror = () => alert('Die Datei konnte nicht gelesen werden.');
+  r.readAsText(file);
+}
+
+function sicherungEinlesen(roh) {
+  let d;
+  try { d = JSON.parse(roh); }
+  catch (e) { alert('Kein gültiges JSON: ' + e.message); return; }
+  if (!d || !d.meta || !d.scores) {
+    alert('Das ist keine Sicherungsdatei dieser App. Eine Entwurfsanalyse wird unter Live-Beobachtung eingelesen.');
+    return;
+  }
+  const bez = (d.meta.laaName || 'ohne Namen') + (d.meta.datum ? ', ' + d.meta.datum : '');
+  if (!confirm('Sicherung von „' + bez + '" als neue Prüfung anlegen? Der aktuelle Stand bleibt erhalten.')) return;
+  saveState();
+  const neueAkte = neueId();
+  try {
+    localStorage.setItem(schluessel(neueAkte), JSON.stringify(d));
+    localStorage.setItem(AKTIV_KEY, neueAkte);
+  } catch (e) { alert('Die Sicherung konnte nicht gespeichert werden.'); return; }
+  location.reload();
 }
 
 function exportPDF() {
