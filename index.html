@@ -846,8 +846,51 @@ function druckansichtZeigen(html){
     zurueck.onclick = druckansichtSchliessen;
     leiste.appendChild(zurueck);
   }
+  /* In einer vom Home-Bildschirm gestarteten App stellt iOS keinen
+     Druckdialog bereit. Dort wird stattdessen das Teilen-Menü
+     angeboten, über das sich das Dokument in Dateien sichern lässt. */
+  const imAppModus = window.navigator.standalone === true ||
+                     (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+  if(leiste && imAppModus){
+    const teilen=document.createElement('button');
+    teilen.textContent='Dokument teilen / sichern';
+    teilen.style.cssText='padding:9px 16px;font-size:14px;border:none;border-radius:8px;background:#1A6B1A;color:#fff;cursor:pointer;';
+    teilen.onclick=()=>dokumentTeilen(html);
+    leiste.insertBefore(teilen, leiste.firstChild);
+    const hinweis=document.createElement('div');
+    hinweis.className='no-print';
+    hinweis.style.cssText='width:100%;font-size:12px;color:#7a5b00;background:#FFF8E6;border:1px solid #E3C36B;border-radius:6px;padding:8px 10px;line-height:1.5;';
+    hinweis.textContent='Hinweis: In der vom Home-Bildschirm gestarteten App bietet iOS keinen Druckdialog. Nutzen Sie „Dokument teilen / sichern“ oder öffnen Sie die App für den PDF-Export in Safari.';
+    leiste.appendChild(hinweis);
+  }
+
   window.scrollTo(0,0);
-  setTimeout(()=>{ try{ window.print(); }catch(e){} }, 400);
+  if(!imAppModus) setTimeout(()=>{ try{ window.print(); }catch(e){} }, 400);
+}
+
+/* Teilt das fertige Dokument als Datei. Über das Teilen-Menü steht
+   „In Dateien sichern" zur Verfügung; von dort lässt es sich öffnen
+   und drucken. */
+function dokumentTeilen(html){
+  const name=(document.getElementById('laaName').value || 'Worturteil').trim()
+              .replace(/[^A-Za-z0-9ÄÖÜäöüß -]/g,'').replace(/\s+/g,'_') || 'Worturteil';
+  try{
+    const datei=new File([html],name+'.html',{type:'text/html'});
+    if(navigator.canShare && navigator.canShare({files:[datei]})){
+      navigator.share({files:[datei],title:name}).catch(()=>{});
+      return;
+    }
+  }catch(e){}
+  try{
+    const blob=new Blob([html],{type:'text/html'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url; a.download=name+'.html';
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{document.body.removeChild(a); URL.revokeObjectURL(url);},1000);
+  }catch(e){
+    alert('Das Dokument konnte nicht geteilt werden. Bitte die App in Safari öffnen und dort drucken.');
+  }
 }
 
 function druckansichtSchliessen(){
