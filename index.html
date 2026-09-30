@@ -356,7 +356,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-s
       <div class="live-status" id="liveStatus">Auf eine Phase tippen, um die Zeit zu starten.</div>
       <div id="phaseBloecke"></div>
       <button class="btn-small" onclick="stopPhase()">Laufende Phase beenden</button>
-      <div class="weight-note">Auf den Phasennamen tippen startet die Zeit; die Zeile rückt an den oberen Rand. Eine beendete Phase ist abgeschlossen (✓) und startet nicht erneut, Einträge bleiben möglich. Erwartungen ohne Phasenzuordnung wandern mit der laufenden Phase; markierte Erwartungen bleiben in ihrer Phase. Notizen lassen sich in jeder Zeile erfassen, auch nachträglich; Eingabetaste oder „+“ übernimmt den Eintrag. Erwartungen aus der Entwurfsanalyse stehen gestrichelt in ihrer Phase und werden mit „bestätigt“ oder „widerlegt“ abgeglichen.</div>
+      <div class="weight-note">Auf den Phasennamen tippen startet die Zeit; die Zeile rückt an den oberen Rand. Eine beendete Phase ist abgeschlossen (✓) und startet nicht erneut, Einträge bleiben möglich. Erwartungen stehen in der Phase, die die Entwurfsanalyse ihnen zuordnet. Erwartungen ohne Zuordnung wandern mit der laufenden Phase und bleiben nach dem Markieren dort stehen. Notizen lassen sich in jeder Zeile erfassen, auch nachträglich; Eingabetaste oder „+“ übernimmt den Eintrag. Erwartungen aus der Entwurfsanalyse stehen gestrichelt in ihrer Phase und werden mit „bestätigt“ oder „widerlegt“ abgeglichen.</div>
     </div>
 
 
@@ -1258,8 +1258,12 @@ function applyImport(raw) {
       phase: (() => {
         if (e.phase == null || e.phase === '') return '';
         if (typeof e.phase === 'number') { const ph = PHASES[e.phase - 1]; return ph ? ph.name : ''; }
-        const n = String(e.phase).trim().toLowerCase();
-        const ph = PHASES.find(p => p.name.trim().toLowerCase() === n);
+        const norm = t => String(t).toLowerCase().replace(/[„“"'»«:·–—-]/g,' ').replace(/\s+/g,' ').trim();
+        const n = norm(e.phase);
+        if (!n) return '';
+        const ph = PHASES.find(p => norm(p.name) === n)
+                || PHASES.find(p => norm(p.name).startsWith(n) || n.startsWith(norm(p.name)))
+                || PHASES.find(p => norm(p.name).includes(n));
         return ph ? ph.name : '';
       })()
     }));
@@ -1340,10 +1344,6 @@ function erwKarte(e,k){
     <div class="vl-erw-akt">
       <button class="exp-btn${e.status==='bestaetigt'?' on-conf':''}" onclick="setExp(${k},'bestaetigt')">bestätigt</button>
       <button class="exp-btn${e.status==='widerlegt'?' on-wid':''}" onclick="setExp(${k},'widerlegt')">widerlegt</button>
-      <select title="Andere Phase zuordnen" onchange="ERWARTUNGEN[${k}].phase=this.value; ERWARTUNGEN[${k}].autoPhase=false; renderPhaseBloecke(); scheduleSave();">
-        <option value=""${phaseBekannt(e.phase)?'':' selected'}>folgt laufender Phase</option>
-        ${PHASES.map(p=>`<option value="${escAttr(p.name)}"${p.name===e.phase?' selected':''}>${escHtml(p.name)}</option>`).join('')}
-      </select>
     </div>
     <input type="text" class="vl-erw-notiz" placeholder="Beobachtung zur Erwartung…" value="${escAttr(e.notiz||'')}" oninput="ERWARTUNGEN[${k}].notiz=this.value; scheduleSave();">
   </div>`;

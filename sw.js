@@ -15,7 +15,7 @@
    Prüfungsdaten liegen im localStorage des Browsers und werden von
    diesem Service Worker weder gelesen noch gelöscht.
    ------------------------------------------------------------------ */
-const CACHE = 'pp-v1';
+const CACHE = 'pp-v2';
 const DATEIEN = [
   './',
   './index.html',
