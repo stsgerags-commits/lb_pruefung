@@ -206,6 +206,55 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-s
 .exp-titel { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #2E86C1; margin: 14px 0 6px; }
 .phase-impuls { font-size: 11px; color: #7a8a99; margin: -4px 0 10px 2px; line-height: 1.5; }
 
+
+/* Unterrichtsverlauf als Tabelle: Phase | Stärken | Irritationen */
+.vl-tabelle { border: 1px solid #dfe7ee; border-radius: 8px; overflow: hidden; margin-bottom: 12px; background: #fff; }
+.vl-kopf, .vl-zeile { display: grid; grid-template-columns: 31% 1fr 1fr; }
+.vl-kopf { background: #2E86C1; color: #fff; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+.vl-kopf > div { padding: 8px 10px; }
+.vl-kopf .punkt { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 0; }
+.vl-zeile { border-top: 1px solid #e6edf2; }
+.vl-zeile.aktiv { background: #f3f8fc; box-shadow: inset 3px 0 0 #2E86C1; }
+.vl-zelle { padding: 10px; min-width: 0; }
+.vl-zelle + .vl-zelle { border-left: 1px solid #eef2f5; }
+.vl-zelle .phase-btn { margin-bottom: 6px; padding: 9px 10px; font-size: 13px; flex-wrap: wrap; gap: 4px; }
+.vl-zeit { font-weight: 700; margin-right: 6px; }
+.vl-zeitlog { font-size: 11px; color: #8a9aa8; line-height: 1.5; margin-top: 4px; }
+.vl-sonst { font-size: 12px; color: #555; margin-top: 10px; padding-top: 8px; border-top: 1px dashed #e3e9ee; line-height: 1.45; }
+.vl-sonst-titel { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #8a9aa8; }
+.vl-eintrag { display: flex; gap: 6px; font-size: 13px; line-height: 1.45; padding: 4px 0; border-bottom: 1px dashed #eef1f4; }
+.vl-eintrag .ts { color: #999; font-size: 11px; padding-top: 2px; flex-shrink: 0; }
+.vl-text { flex: 1; word-break: break-word; }
+.vl-weg { border: none; background: none; color: #bbb; cursor: pointer; font-size: 12px; padding: 0 2px; }
+.vl-weg:hover { color: #A32D2D; }
+.vl-eingabe { display: flex; gap: 4px; margin-top: 6px; }
+.vl-eingabe input { flex: 1; min-width: 0; padding: 7px 8px; font-size: 13px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; }
+.vl-eingabe input:focus { outline: none; border-color: #2E86C1; box-shadow: 0 0 0 3px rgba(46,134,193,0.12); }
+.vl-erw { font-size: 12px; padding: 6px 8px; border-radius: 6px; margin-bottom: 6px; line-height: 1.4; border: 1px solid transparent; }
+.vl-erw.offen { background: #f7f9fb; border: 1px dashed #cfdbe6; }
+.vl-erw-beleg { font-size: 11px; color: #888; font-style: italic; margin-top: 2px; }
+.vl-erw-akt { display: flex; gap: 4px; margin-top: 5px; flex-wrap: wrap; align-items: center; }
+.vl-erw-akt .exp-btn { padding: 2px 8px; font-size: 11px; }
+.vl-erw-akt select { margin-left: auto; max-width: 120px; padding: 2px 4px; font-size: 11px; border: 1px solid #ddd; border-radius: 5px; background: #fff; color: #666; font-family: inherit; }
+.vl-erw-notiz { width: 100%; margin-top: 5px; padding: 5px 7px; font-size: 12px; border: 1px solid #ddd; border-radius: 5px; font-family: inherit; background: #fff; }
+.vl-zeile.quer { background: #fbfcfd; border-top: 2px solid #dfe7ee; }
+.vl-zeile.erledigt .vl-zelle:first-child { background: #f7f9fa; }
+.phase-btn.erledigt { background: #eef2f5; border-color: #dfe5ea; color: #5f7282; cursor: default; }
+.phase-btn.erledigt:hover { background: #eef2f5; }
+.vl-haken { color: #2D6A2D; font-weight: 700; margin-right: 4px; }
+.vl-wieder { font-size: 11px; color: #2E86C1; cursor: pointer; text-decoration: underline; margin-top: 4px; display: inline-block; }
+.vl-erw.bestaetigt { background: #E8F4E8; }
+.vl-erw.widerlegt { background: #FCEBEB; }
+.vl-erw-marke { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #666; }
+.exp-phase { margin-top: 6px; font-size: 12px; color: #666; }
+.exp-phase select { padding: 4px 6px; font-size: 12px; border: 1px solid #ddd; border-radius: 6px; background: #fff; font-family: inherit; }
+@media (max-width: 680px) {
+  .vl-kopf { display: none; }
+  .vl-zeile { grid-template-columns: 1fr; }
+  .vl-zelle + .vl-zelle { border-left: none; border-top: 1px dashed #eef2f5; }
+  .vl-zelle[data-label]::before { content: attr(data-label); display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #2E86C1; margin-bottom: 4px; }
+}
+
 @media (max-width: 560px) {
   .scale { grid-template-columns: repeat(3, 1fr); }
   .meta-grid, .score-grid, .setnote-grid { grid-template-columns: 1fr; }
@@ -307,7 +356,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-s
       <div class="live-status" id="liveStatus">Auf eine Phase tippen, um die Zeit zu starten.</div>
       <div id="phaseBloecke"></div>
       <button class="btn-small" onclick="stopPhase()">Laufende Phase beenden</button>
+      <div class="weight-note">Auf den Phasennamen tippen startet die Zeit; die Zeile rückt an den oberen Rand. Eine beendete Phase ist abgeschlossen (✓) und startet nicht erneut, Einträge bleiben möglich. Erwartungen ohne Phasenzuordnung wandern mit der laufenden Phase; markierte Erwartungen bleiben in ihrer Phase. Notizen lassen sich in jeder Zeile erfassen, auch nachträglich; Eingabetaste oder „+“ übernimmt den Eintrag. Erwartungen aus der Entwurfsanalyse stehen gestrichelt in ihrer Phase und werden mit „bestätigt“ oder „widerlegt“ abgeglichen.</div>
     </div>
+
 
     <button class="btn-primary" onclick="showView('bewertung')">Zur Bewertung →</button>
 
@@ -1044,10 +1095,20 @@ ${(() => {
 ${gestellt.map(f => `<tr><td>${esc(f.frage)}${f.eigen?' <span style="font-size:10px;color:#1F618D;">(eigene Frage)</span>':''}${(f.schritt||f.theorie)?`<div style="font-size:10.5px;color:#777;margin-top:3px;">${esc([f.schritt,f.theorie].filter(Boolean).join(' · '))}</div>`:''}</td><td style="font-size:11px;">${esc(f.notiz||'')}</td></tr>`).join('')}
 </table>`;
 })()}
-${(typeof PHASES !== 'undefined' && PHASES.length) ? `<h2>Unterrichtsverlauf</h2>
-<table><tr><th style="width:52px;">Zeit</th><th style="width:24%;">Phase</th><th style="width:56px;">Geplant</th><th>Beobachtungsimpuls und Bemerkungen</th></tr>
-${PHASES.map((ph,i) => `<tr><td>${esc(startZeit(i))}</td><td>${esc(ph.name)}</td><td>${ph.minutes} Min.</td><td style="font-size:11px;">${ph.impuls?`<em>${esc(ph.impuls)}</em>`:''}${(ph.log&&ph.log.length)?`<div style="margin-top:4px;">${ph.log.map(e=>`${esc(e.time)} &nbsp; ${esc(e.text)}`).join('<br>')}</div>`:''}</td></tr>`).join('')}
-</table>` : ''}
+${(typeof PHASES !== 'undefined' && PHASES.length) ? (() => {
+  const art = e => e.art || (/^Phase (begonnen|beendet)/.test(e.text||'') ? 'zeit' : 'notiz');
+  const liste = (ph, a) => {
+    const erw = ERWARTUNGEN.filter(e => e.art===a && e.status && e.phase===ph.name)
+      .map(e => `<div style="margin-bottom:3px;"><em>Erwartung ${e.status==='bestaetigt'?'bestätigt':'widerlegt'}:</em> ${esc(e.text)}</div>`);
+    const ein = (ph.log||[]).filter(e => art(e)===a)
+      .map(e => `<div style="margin-bottom:3px;"><span style="color:#888;">${esc(String(e.time||'').slice(0,5))}</span> ${esc(e.text)}</div>`);
+    return erw.concat(ein).join('');
+  };
+  return `<h2>Unterrichtsverlauf</h2>
+<table><tr><th style="width:30%;">Phase lt. Planung</th><th>Stärken</th><th>Irritationen</th></tr>
+${PHASES.map((ph,i) => `<tr style="vertical-align:top;"><td><strong>${esc(startZeit(i))} ${esc(ph.name)}</strong><div style="font-size:10.5px;color:#777;">geplant ${ph.minutes} Min.</div>${ph.impuls?`<div style="font-size:10.5px;color:#777;font-style:italic;margin-top:3px;">${esc(ph.impuls)}</div>`:''}${(ph.log||[]).filter(e=>art(e)==='zeit').length?`<div style="font-size:10.5px;color:#777;margin-top:3px;">${(ph.log||[]).filter(e=>art(e)==='zeit').map(e=>esc(String(e.time||'').slice(0,5))+' '+esc(e.text.replace(/^Phase /,''))).join('<br>')}</div>`:''}${(ph.log||[]).filter(e=>art(e)==='notiz').length?`<div style="font-size:11px;margin-top:6px;"><div style="font-size:10px;font-weight:700;color:#777;text-transform:uppercase;">Allgemeine Beobachtungen</div>${(ph.log||[]).filter(e=>art(e)==='notiz').map(e=>`<span style="color:#888;">${esc(String(e.time||'').slice(0,5))}</span> ${esc(e.text)}`).join('<br>')}</div>`:''}</td><td style="font-size:11px;">${liste(ph,'staerke')}</td><td style="font-size:11px;">${liste(ph,'irritation')}</td></tr>`).join('')}
+</table>`;
+})() : ''}
 <h2>Worturteil</h2><div class="worturteil">${esc(worturteil)}</div>
 <div class="sig"><div>Datum: ___________________</div><div>Unterschrift: ___________________</div></div>
 <div class="footer">
@@ -1116,11 +1177,17 @@ function renderPhaseEditor() {
       <input type="text" class="zeit-feld${(!p.start && startZeit(i))?' abgeleitet':''}" value="${escAttr(p.start || startZeit(i) || '')}" placeholder="Start"
              title="Startzeit, z. B. 09:05. Wird nichts eingetragen, schreibt die App die Zeit aus der vorherigen Phase fort."
              oninput="PHASES[${i}].start=this.value; renderPhaseEditor(); renderPhaseButtons(); scheduleSave();">
-      <input type="text" value="${escAttr(p.name)}" oninput="PHASES[${i}].name=this.value; renderPhaseButtons();">
+      <input type="text" value="${escAttr(p.name)}" oninput="renamePhase(${i},this.value)">
       <input type="number" value="${p.minutes}" min="1" oninput="PHASES[${i}].minutes=parseInt(this.value,10)||1; renderPhaseEditor(); renderPhaseButtons();">
       <span class="unit">Min.</span>
       <button class="btn-small" onclick="removePhase(${i})">✕</button>
     </div>`).join('');
+}
+function renamePhase(i,v){
+  const alt=PHASES[i].name;
+  ERWARTUNGEN.forEach(e=>{ if(e.phase===alt) e.phase=v; });
+  PHASES[i].name=v;
+  renderPhaseButtons(); scheduleSave();
 }
 function addPhase() { PHASES.push({ name:'Neue Phase', minutes:5, start:'', log:[] }); renderPhaseEditor(); renderPhaseButtons(); scheduleSave(); }
 function removePhase(i) {
@@ -1187,7 +1254,14 @@ function applyImport(raw) {
       art: (e.art === 'irritation') ? 'irritation' : 'staerke',
       text: String(e.text || ''),
       beleg: e.beleg ? String(e.beleg) : '',
-      status: null, phase: '', notiz: ''
+      status: null, notiz: '',
+      phase: (() => {
+        if (e.phase == null || e.phase === '') return '';
+        if (typeof e.phase === 'number') { const ph = PHASES[e.phase - 1]; return ph ? ph.name : ''; }
+        const n = String(e.phase).trim().toLowerCase();
+        const ph = PHASES.find(p => p.name.trim().toLowerCase() === n);
+        return ph ? ph.name : '';
+      })()
     }));
     done.push(ERWARTUNGEN.length + ' Erwartungen');
   }
@@ -1214,36 +1288,129 @@ function applyImport(raw) {
 
 function renderPhaseButtons(){ renderPhaseBloecke(); }
 
-/* Ein Block je Phase. Die laufende Phase ist aufgeklappt und zeigt
-   Beobachtungsimpuls, eigenes Protokoll und den Erwartungsabgleich. */
+/* Unterrichtsverlauf als Tabelle: links die Phase lt. Planung,
+   rechts je eine Spalte für Stärken und Irritationen. Einträge werden
+   im Protokoll der Phase mit art 'staerke' / 'irritation' gespeichert;
+   Zeitmarken tragen art 'zeit'. Ältere Einträge ohne art werden
+   weiterhin angezeigt (Zeitmarken erkannt, übrige als Notiz). */
+const ENTWURF = {};   // noch nicht übernommene Eingaben je Zelle
+
+function eintragArt(e){
+  if(e.art) return e.art;
+  return /^Phase (begonnen|beendet)/.test(e.text||'') ? 'zeit' : 'notiz';
+}
+function kurzZeit(t){ return String(t||'').slice(0,5); }
+
+function zelleHtml(i, art){
+  const p=PHASES[i];
+  const eintr=(p.log||[]).map((e,k)=>({e,k})).filter(x=>eintragArt(x.e)===art);
+  const key=art+'-'+i;
+  return `
+    ${erwListe(e=>e.art===art && (e.phase===p.name || (!phaseBekannt(e.phase) && i===aktuelleZeile())))}
+    ${eintr.map(x=>`<div class="vl-eintrag"><span class="ts">${escHtml(kurzZeit(x.e.time))}</span><span class="vl-text">${escHtml(x.e.text)}</span><button class="vl-weg" title="Eintrag löschen" onclick="removeNote(${i},${x.k})">✕</button></div>`).join('')}
+    <div class="vl-eingabe">
+      <input type="text" id="in-${key}" value="${escAttr(ENTWURF[key]||'')}" placeholder="${art==='staerke'?'Stärke notieren…':'Irritation notieren…'}"
+             oninput="ENTWURF['${key}']=this.value" onkeydown="if(event.key==='Enter'){event.preventDefault();addNote(${i},'${art}');}">
+      <button class="btn-small" title="Übernehmen" onclick="addNote(${i},'${art}')">+</button>
+    </div>`;
+}
+
+/* Erwartungen aus der Entwurfsanalyse stehen als Karten direkt in der
+   Zeile ihrer Phase (Feld "phase" in der JSON). Erwartungen ohne oder
+   mit unbekannter Phase stehen in der Zeile "Phasenübergreifend". */
+function phaseBekannt(name){ return !!name && PHASES.some(p=>p.name===name); }
+/* Aktuelle Zeile: laufende Phase, sonst die erste noch nicht
+   abgeschlossene, sonst die letzte. Erwartungen ohne Phasenzuordnung
+   stehen immer in dieser Zeile und wandern beim Phasenwechsel mit.
+   Wird eine davon als bestätigt/widerlegt markiert, bleibt sie in
+   der Phase, in der das geschah. */
+function aktuelleZeile(){
+  if(liveState.activeIdx!==null && PHASES[liveState.activeIdx]) return liveState.activeIdx;
+  const i=PHASES.findIndex(p=>!istAbgeschlossen(p));
+  return i>=0 ? i : PHASES.length-1;
+}
+function erwListe(filter){
+  return ERWARTUNGEN.map((e,k)=>({e,k})).filter(x=>filter(x.e)).map(x=>erwKarte(x.e,x.k)).join('');
+}
+function erwKarte(e,k){
+  const st=e.status||'offen';
+  return `<div class="vl-erw ${st}">
+    <span class="vl-erw-marke">Erwartung aus dem Entwurf${e.status?' · '+(e.status==='bestaetigt'?'bestätigt':'widerlegt'):''}</span>${escHtml(e.text)}
+    ${e.beleg?`<div class="vl-erw-beleg">Beleg: ${escHtml(e.beleg)}</div>`:''}
+    <div class="vl-erw-akt">
+      <button class="exp-btn${e.status==='bestaetigt'?' on-conf':''}" onclick="setExp(${k},'bestaetigt')">bestätigt</button>
+      <button class="exp-btn${e.status==='widerlegt'?' on-wid':''}" onclick="setExp(${k},'widerlegt')">widerlegt</button>
+      <select title="Andere Phase zuordnen" onchange="ERWARTUNGEN[${k}].phase=this.value; ERWARTUNGEN[${k}].autoPhase=false; renderPhaseBloecke(); scheduleSave();">
+        <option value=""${phaseBekannt(e.phase)?'':' selected'}>folgt laufender Phase</option>
+        ${PHASES.map(p=>`<option value="${escAttr(p.name)}"${p.name===e.phase?' selected':''}>${escHtml(p.name)}</option>`).join('')}
+      </select>
+    </div>
+    <input type="text" class="vl-erw-notiz" placeholder="Beobachtung zur Erwartung…" value="${escAttr(e.notiz||'')}" oninput="ERWARTUNGEN[${k}].notiz=this.value; scheduleSave();">
+  </div>`;
+}
+
+/* Eine Phase gilt als abgeschlossen, sobald sie einmal beendet wurde
+   (Wechsel zur nächsten Phase oder "Laufende Phase beenden"). Sie
+   startet dann nicht erneut; Einträge bleiben weiterhin möglich.
+   Ältere Arbeitsstände ohne Feld "done" werden am Protokoll erkannt. */
+function istAbgeschlossen(p){
+  if(p.done===true) return true;
+  if(p.done===false) return false;
+  return (p.log||[]).some(e=>/^Phase beendet/.test(e.text||''));
+}
+function phaseOeffnen(i){
+  if(!confirm('Phase „'+PHASES[i].name+'" wieder öffnen? Danach kann die Zeit erneut gestartet werden.')) return;
+  PHASES[i].done=false;
+  renderPhaseBloecke(); scheduleSave();
+}
+
+function phaseZelleHtml(i){
+  const p=PHASES[i], aktiv=liveState.activeIdx===i;
+  const log=p.log||[];
+  const zeit=log.filter(e=>eintragArt(e)==='zeit');
+  const notiz=log.map((e,k)=>({e,k})).filter(x=>eintragArt(x.e)==='notiz');
+  return `
+    ${(!aktiv && istAbgeschlossen(p)) ? `
+    <button class="phase-btn erledigt" title="Phase abgeschlossen">
+      <span><span class="vl-haken">✓</span>${startZeit(i)?`<span class="vl-zeit">${startZeit(i)}</span>`:''}${escHtml(p.name)}</span>
+      <span class="planned">${p.dauerSek!=null?fmtTime(p.dauerSek)+' / ':''}${p.minutes} Min.</span>
+    </button>` : `
+    <button class="phase-btn${aktiv?' running':''}" onclick="startPhase(${i})">
+      <span>${startZeit(i)?`<span class="vl-zeit">${startZeit(i)}</span>`:''}${escHtml(p.name)}</span>
+      <span class="planned">${aktiv?'<span id="laufUhr">00:00</span> / ':''}${p.minutes} Min.</span>
+    </button>`}
+    ${p.impuls?`<div class="phase-impuls" style="margin:0 0 4px 2px;">${escHtml(p.impuls)}</div>`:''}
+    ${zeit.length?`<div class="vl-zeitlog">${zeit.map(e=>escHtml(kurzZeit(e.time))+' '+escHtml(e.text.replace(/^Phase /,''))).join('<br>')}</div>`:''}
+    ${(!aktiv && istAbgeschlossen(p))?`<span class="vl-wieder" onclick="phaseOeffnen(${i})">wieder öffnen</span>`:''}
+    <div class="vl-sonst">
+      <div class="vl-sonst-titel">Allgemeine Beobachtungen</div>
+      ${notiz.map(x=>`<div class="vl-eintrag"><span class="ts">${escHtml(kurzZeit(x.e.time))}</span><span class="vl-text">${escHtml(x.e.text)}</span><button class="vl-weg" title="Eintrag löschen" onclick="removeNote(${i},${x.k})">✕</button></div>`).join('')}
+      <div class="vl-eingabe">
+        <input type="text" id="in-notiz-${i}" value="${escAttr(ENTWURF['notiz-'+i]||'')}" placeholder="Beobachtung notieren…"
+               oninput="ENTWURF['notiz-${i}']=this.value" onkeydown="if(event.key==='Enter'){event.preventDefault();addNote(${i},'notiz');}">
+        <button class="btn-small" title="Übernehmen" onclick="addNote(${i},'notiz')">+</button>
+      </div>
+    </div>`;
+}
+
 function renderPhaseBloecke(){
   const c=document.getElementById('phaseBloecke');
   if(!c) return;
-  c.innerHTML=PHASES.map((p,i)=>{
-    const aktiv = liveState.activeIdx===i;
-    const eintraege = (p.log||[]);
-    return `
-    <div class="phase-block${aktiv?' aktiv':''}">
-      <button class="phase-btn${aktiv?' running':''}" onclick="startPhase(${i})">
-        <span>${escHtml(p.name)}</span>
-        <span class="planned">${aktiv?'<span id="laufUhr">00:00</span> / ':''}${startZeit(i)?startZeit(i)+' / ':''}${p.minutes} Min.</span>
-      </button>
-      ${p.impuls?`<div class="phase-impuls">${escHtml(p.impuls)}</div>`:''}
-      ${aktiv?`
-        <div class="phase-inner">
-          <div class="note-input-row">
-            <input type="text" id="quickNote" placeholder="Bemerkung zu dieser Phase…" onkeydown="if(event.key==='Enter')addNote()">
-            <button class="btn-small" onclick="addNote()">Erfassen</button>
-          </div>
-          ${eintraege.length?`<div class="protocol-log">${eintraege.slice().reverse().map(e=>
-            `<div class="protocol-entry"><span class="ts">${escHtml(e.time)}</span>${escHtml(e.text)}</div>`).join('')}</div>`
-            :'<div class="protocol-empty">Noch keine Bemerkung.</div>'}
-          <div class="exp-titel">Erwartungen abgleichen</div>
-          <div>${erwartungenHtml(i)}</div>
-        </div>`
-      :(eintraege.length?`<div class="phase-kurz">${eintraege.length} Bemerkung${eintraege.length===1?'':'en'} erfasst</div>`:'')}
-    </div>`;
-  }).join('');
+  c.innerHTML = PHASES.length ? `
+    <div class="vl-tabelle">
+      <div class="vl-kopf">
+        <div>Phase lt. Planung</div>
+        <div><span class="punkt" style="background:#9fd09f;"></span>Stärken</div>
+        <div><span class="punkt" style="background:#f0c27a;"></span>Irritationen</div>
+      </div>
+      ${PHASES.map((p,i)=>`
+      <div class="vl-zeile${liveState.activeIdx===i?' aktiv':''}${(liveState.activeIdx!==i && istAbgeschlossen(p))?' erledigt':''}" id="vl-zeile-${i}">
+        <div class="vl-zelle">${phaseZelleHtml(i)}</div>
+        <div class="vl-zelle" data-label="Stärken">${zelleHtml(i,'staerke')}</div>
+        <div class="vl-zelle" data-label="Irritationen">${zelleHtml(i,'irritation')}</div>
+      </div>`).join('')}
+    </div>` : '<span class="protocol-empty">Keine Phasen angelegt. Entwurfsanalyse importieren oder Phasen oben hinzufügen.</span>';
+
 }
 
 function erwartungenHtml(phaseIdx){
@@ -1253,34 +1420,47 @@ function erwartungenHtml(phaseIdx){
       <div class="exp-head">
         <span class="exp-kind ${e.art}">${e.art==='irritation'?'Irritation':'Stärke'}</span>
         <div class="exp-text">${escHtml(e.text)}
-          ${e.beleg?`<div class="exp-beleg">Entwurfsbeleg: ${escHtml(e.beleg)}</div>`:''}
-          ${e.phase?`<div class="exp-beleg">markiert in: ${escHtml(e.phase)}</div>`:''}</div>
+          ${e.beleg?`<div class="exp-beleg">Entwurfsbeleg: ${escHtml(e.beleg)}</div>`:''}</div>
       </div>
       <div class="exp-actions">
-        <button class="exp-btn${e.status==='bestaetigt'?' on-conf':''}" onclick="setExp(${i},'bestaetigt',${phaseIdx})">bestätigt</button>
-        <button class="exp-btn${e.status==='widerlegt'?' on-wid':''}" onclick="setExp(${i},'widerlegt',${phaseIdx})">widerlegt</button>
-        <button class="exp-btn" onclick="setExp(${i},null,${phaseIdx})">offen</button>
+        <button class="exp-btn${e.status==='bestaetigt'?' on-conf':''}" onclick="setExp(${i},'bestaetigt',${phaseIdx===null?'null':phaseIdx})">bestätigt</button>
+        <button class="exp-btn${e.status==='widerlegt'?' on-wid':''}" onclick="setExp(${i},'widerlegt',${phaseIdx===null?'null':phaseIdx})">widerlegt</button>
+        <button class="exp-btn" onclick="setExp(${i},null,null)">offen</button>
       </div>
+      ${e.status?`<div class="exp-phase">Phase:
+        <select onchange="ERWARTUNGEN[${i}].phase=this.value; renderPhaseBloecke(); scheduleSave();">
+          <option value="">– keine –</option>
+          ${PHASES.map(p=>`<option value="${escAttr(p.name)}"${p.name===e.phase?' selected':''}>${escHtml(p.name)}</option>`).join('')}
+        </select></div>`:''}
       <textarea class="exp-note" placeholder="Beobachtungsnotiz" oninput="ERWARTUNGEN[${i}].notiz=this.value; scheduleSave();">${escHtml(e.notiz||'')}</textarea>
     </div>`).join('');
 }
 
-function setExp(i,status,phaseIdx){
+function setExp(i,status){
   const e=ERWARTUNGEN[i];
-  if(e.status===status){ e.status=null; e.phase=''; }
-  else { e.status=status; e.phase = status ? (PHASES[phaseIdx]?PHASES[phaseIdx].name:'') : ''; }
+  if(!e) return;
+  e.status = (e.status===status) ? null : status;
+  if(e.status && !phaseBekannt(e.phase) && PHASES[aktuelleZeile()]){
+    e.phase = PHASES[aktuelleZeile()].name; e.autoPhase = true;
+  } else if(!e.status && e.autoPhase){
+    e.phase = ''; e.autoPhase = false;
+  }
   renderPhaseBloecke(); scheduleSave();
 }
 
 function startPhase(i){
-  if(liveState.activeIdx!==null && liveState.activeIdx!==i) logPhaseEnd();
   if(liveState.activeIdx===i) return;          // laufende Phase nicht neu starten
+  if(istAbgeschlossen(PHASES[i])) return;      // abgeschlossene Phase startet nicht erneut
+  if(liveState.activeIdx!==null) logPhaseEnd();
   liveState.activeIdx=i;
   liveState.phaseStart=Date.now();
   if(!PHASES[i].log) PHASES[i].log=[];
-  PHASES[i].log.push({time:nowLabel(),text:'Phase begonnen'});
+  PHASES[i].log.push({time:nowLabel(),text:'Phase begonnen',art:'zeit'});
   if(!liveState.timerHandle) liveState.timerHandle=setInterval(tickClock,500);
   renderPhaseBloecke(); tickClock(); scheduleSave();
+  /* laufende Phase an den oberen Bildschirmrand holen */
+  const z=document.getElementById('vl-zeile-'+i);
+  if(z) z.scrollIntoView({behavior:'smooth', block:'start'});
 }
 
 function stopPhase(){
@@ -1302,7 +1482,8 @@ function logPhaseEnd(){
   const zusatz = diff>0 ? ' — überzogen um '+fmtTime(diff)
                         : (diff<0 ? ' — '+fmtTime(-diff)+' unter der Planung' : ' — punktgenau');
   if(!p.log) p.log=[];
-  p.log.push({time:nowLabel(),text:'Phase beendet nach '+fmtTime(sek)+' von '+p.minutes+':00'+zusatz});
+  p.log.push({time:nowLabel(),text:'Phase beendet nach '+fmtTime(sek)+' von '+p.minutes+':00'+zusatz,art:'zeit'});
+  p.done=true; p.dauerSek=sek;
 }
 
 function tickClock(){
@@ -1319,16 +1500,21 @@ function tickClock(){
     st.textContent='„'+p.name+'" läuft · geplant '+p.minutes+':00'; }
 }
 
-function addNote(){
-  const f=document.getElementById('quickNote');
-  if(!f) return;
-  const t=f.value.trim();
-  if(!t) return;
-  if(liveState.activeIdx===null){ alert('Bitte zuerst eine Phase starten.'); return; }
-  const p=PHASES[liveState.activeIdx];
-  if(!p.log) p.log=[];
-  p.log.push({time:nowLabel(),text:t});
-  f.value='';
+function addNote(i, art){
+  const key=art+'-'+i;
+  const f=document.getElementById('in-'+key);
+  const t=(f?f.value:'').trim();
+  if(!t || !PHASES[i]) return;
+  if(!PHASES[i].log) PHASES[i].log=[];
+  PHASES[i].log.push({time:nowLabel(),text:t,art});
+  delete ENTWURF[key];
+  renderPhaseBloecke(); scheduleSave();
+  const n=document.getElementById('in-'+key); if(n) n.focus();
+}
+function removeNote(i,k){
+  if(!PHASES[i] || !PHASES[i].log || !PHASES[i].log[k]) return;
+  if(!confirm('Eintrag löschen?')) return;
+  PHASES[i].log.splice(k,1);
   renderPhaseBloecke(); scheduleSave();
 }
 

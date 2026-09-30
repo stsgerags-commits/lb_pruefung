@@ -1,32 +1,17 @@
 {
   "name": "Bewertung Praktische Prüfung",
   "short_name": "PP",
-  "description": "Standardisiertes Leistungsbild zur praktischen Prüfung – Bewertung, Live-Beobachtung und Worturteil",
+  "description": "Live-Beobachtung und Bewertung der praktischen Prüfung nach dem Standardisierten Leistungsbild Thüringen",
   "lang": "de",
-  "start_url": "./index.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "orientation": "portrait-primary",
+  "orientation": "any",
   "background_color": "#f5f5f5",
   "theme_color": "#2E86C1",
   "icons": [
-    {
-      "src": "./icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "./icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "./icon-512-maskable.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
   ]
 }
