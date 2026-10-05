@@ -55,6 +55,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-s
 .scale-btn:hover { border-color: #aaa; background: #f8f8f8; }
 .scale-note { font-size: 11px; font-weight: 600; color: #555; }
 .scale-word { font-size: 9px; color: #999; margin-top: 2px; }
+.scale-btn { position: relative; }
+.scale-btn.prog::after { content: 'E'; position: absolute; top: -7px; right: -7px; width: 17px; height: 17px; line-height: 17px; border-radius: 50%; background: #2E86C1; color: #fff; font-size: 10px; font-weight: 700; text-align: center; box-shadow: 0 0 0 2px #fff; }
+.prog-info { display: none; font-size: 11px; color: #5f7282; margin-top: 8px; line-height: 1.5; }
+.prog-info.shown { display: block; }
+.prog-info .prog-marke { display: inline-block; width: 15px; height: 15px; line-height: 15px; border-radius: 50%; background: #2E86C1; color: #fff; font-size: 9px; font-weight: 700; text-align: center; margin-right: 5px; vertical-align: 1px; }
+.prog-info .prog-beleg { font-style: italic; color: #888; }
+.prog-info.abw { color: #7A5B00; }
+.prog-hinweis { font-size: 11px; color: #1F618D; background: #eef5fb; border: 1px solid #cfe1f0; border-radius: 8px; padding: 8px 10px; margin-bottom: 12px; line-height: 1.5; display: none; }
 .pts-badge { display: inline-block; font-size: 9px; font-weight: 600; color: #888; background: #f0f0f0; border: 1px solid #ddd; border-radius: 10px; padding: 1px 5px; margin-bottom: 3px; }
 
 .scale-btn.sel-1 { background: #E8F4E8; border-color: #2D6A2D; } .scale-btn.sel-1 .scale-note { color: #2D6A2D; }
@@ -311,6 +319,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-s
       </div>
     </div>
 
+    <div class="prog-hinweis" id="progHinweis"><span class="prog-marke" style="display:inline-block;width:15px;height:15px;line-height:15px;border-radius:50%;background:#2E86C1;color:#fff;font-size:9px;font-weight:700;text-align:center;margin-right:5px;">E</span><strong>Entwurfsprognose</strong> aus der Stundenanalyse. Bei der Planung ist die Prognose als Vorauswahl gesetzt und jederzeit änderbar. Bei Durchführung und Reflexion ist sie nur markiert – die Bewertung erfolgt allein aus der Beobachtung. Die Prognose erscheint nicht im PDF-Export.</div>
     <div class="section">
       <div class="section-header"><span class="section-title">Anforderung: Planung</span><span class="section-badge" id="badge-planung">nicht bewertet</span></div>
       <div id="criteria-planung"></div>
@@ -341,7 +350,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-s
         <textarea id="importPaste" placeholder="JSON hier einfügen, dann auf Übernehmen tippen." style="width:100%;min-height:90px;padding:10px;font-size:12px;border:1px solid #ddd;border-radius:8px;font-family:ui-monospace,Menlo,monospace;resize:vertical;line-height:1.4;"></textarea>
         <button class="btn-small" style="margin-top:8px;" onclick="importAusFeld()">Übernehmen</button>
       </div>
-      <div class="weight-note">Der Import füllt Kopfdaten, Phasenplanung mit Beobachtungsimpulsen, den Erwartungsabgleich und die Nachgesprächsfragen. Bewertungen werden bewusst nicht vorbelegt.</div>
+      <div class="weight-note">Der Import füllt Kopfdaten, Phasenplanung mit Beobachtungsimpulsen, den Erwartungsabgleich und die Nachgesprächsfragen. Eine Entwurfsprognose wird nur bei der Planung vorausgewählt; bei Durchführung und Reflexion ist sie lediglich markiert.</div>
     </div>
 
     <div class="panel">
@@ -601,7 +610,8 @@ function buildCriteria(sectionId, items) {
         </button>`).join('')}
       </div>
       <div class="ptrow" id="ptrow-${item.id}"><span class="ptrow-label">Punktwert</span><span id="ptbtns-${item.id}"></span><span class="ptrow-hint">Tendenz innerhalb der Notenstufe (§ 26)</span></div>
-      <div class="preview-text" id="prev-${item.id}"></div>`;
+      <div class="preview-text" id="prev-${item.id}"></div>
+      <div class="prog-info" id="prog-${item.id}"></div>`;
     container.appendChild(div);
   });
 }
@@ -609,13 +619,73 @@ function buildCriteria(sectionId, items) {
 function selectNote(id, noteIdx, section) {
   const prev = scores[id];
   const pts = (prev && prev.noteIdx === noteIdx) ? prev.pts : DEFAULT_PT[noteIdx];
-  scores[id] = { noteIdx, pts, section };
+  scores[id] = { noteIdx, pts, section };   // manuelle Bewertung: ausPrognose entfällt
   renderCriterion(id, section);
 }
 
 function selectPts(id, pts, section) {
   scores[id].pts = pts;
   renderCriterion(id, section);
+}
+
+/* ------------------------------------------------------------------
+   Entwurfsprognose (aus der JSON der Stundenanalyse, Feld "prognose").
+   Planung: Vorauswahl, falls noch nicht bewertet. Durchführung und
+   Reflexion: nur Markierung "E", keine Vorauswahl. Die Prognose wird
+   lokal gespeichert, aber nicht in den PDF-Export übernommen.
+   ------------------------------------------------------------------ */
+let PROGNOSE = {};
+
+function sectionOf(id){
+  if (CRITERIA.planung.some(c=>c.id===id)) return 'planung';
+  if (CRITERIA.durchfuehrung.some(c=>c.id===id)) return 'durchfuehrung';
+  return 'reflexion';
+}
+function markPrognose(id){
+  const pr = PROGNOSE[id];
+  const sc = document.getElementById('scale-'+id);
+  if (sc) sc.querySelectorAll('.scale-btn').forEach((b,i)=>b.classList.toggle('prog', !!pr && i===pr.note-1));
+  const info = document.getElementById('prog-'+id);
+  if (!info) return;
+  if (!pr) { info.className='prog-info'; info.innerHTML=''; return; }
+  const s = scores[id];
+  const abw = s && s.noteIdx !== pr.note-1;
+  const vorauswahl = sectionOf(id)==='planung';
+  info.className = 'prog-info shown' + (abw ? ' abw' : '');
+  info.innerHTML = `<span class="prog-marke">E</span>Entwurfsprognose: Note ${pr.note}`
+    + (vorauswahl ? (s && s.ausPrognose ? ' (als Vorauswahl gesetzt)' : '') : ' (nur Orientierung, keine Vorauswahl)')
+    + (abw ? ` · <strong>Bewertung weicht ab (Note ${s.noteIdx+1})</strong>` : '')
+    + (pr.beleg ? `<div class="prog-beleg">${escHtml(pr.beleg)}</div>` : '');
+}
+function renderAllPrognose(){
+  allItems().forEach(c=>markPrognose(c.id));
+  const h=document.getElementById('progHinweis');
+  if (h) h.style.display = Object.keys(PROGNOSE).length ? 'block' : 'none';
+}
+function importPrognose(obj){
+  const neu = {};
+  let n = 0;
+  allItems().forEach(c => {
+    const e = obj[c.id];
+    if (!e) return;
+    const note = parseInt(typeof e === 'object' ? e.note : e, 10);
+    if (!(note >= 1 && note <= 6)) return;
+    let pts = typeof e === 'object' ? parseInt(e.punkte, 10) : NaN;
+    if (POINTS_BY_NOTE[note-1].indexOf(pts) === -1) pts = null;
+    neu[c.id] = { note, punkte: pts, beleg: (typeof e === 'object' && e.beleg) ? String(e.beleg) : '' };
+    n++;
+  });
+  PROGNOSE = neu;
+  let vor = 0;
+  CRITERIA.planung.forEach(c => {
+    const pr = PROGNOSE[c.id];
+    if (!pr || scores[c.id] !== undefined) return;   // vorhandene Bewertung nie überschreiben
+    scores[c.id] = { noteIdx: pr.note-1, pts: pr.punkte != null ? pr.punkte : DEFAULT_PT[pr.note-1], section: 'planung', ausPrognose: true };
+    renderCriterion(c.id, 'planung');
+    vor++;
+  });
+  renderAllPrognose();
+  return { n, vor };
 }
 
 function renderCriterion(id, section) {
@@ -632,6 +702,7 @@ function renderCriterion(id, section) {
   prev.className = 'preview-text shown';
   updateBadge(section);
   updateProgress();
+  markPrognose(id);
 }
 
 function getAvgPts(items) {
@@ -1280,14 +1351,19 @@ function applyImport(raw) {
     done.push(FRAGEN.length + ' Fragen');
   }
 
+  if (d.prognose && typeof d.prognose === 'object') {
+    const r = importPrognose(d.prognose);
+    if (r.n) done.push('Entwurfsprognose für ' + r.n + ' Kriterien' + (r.vor ? ' (' + r.vor + ' Planungskriterien vorausgewählt)' : ''));
+  }
+
   if (!done.length) {
-    importStatus('JSON gelesen, aber keine bekannten Felder gefunden (meta, phasen, erwartungen, fragen).', false);
+    importStatus('JSON gelesen, aber keine bekannten Felder gefunden (meta, phasen, erwartungen, fragen, prognose).', false);
     return;
   }
 
   renderLive();
   scheduleSave();
-  importStatus('Importiert: ' + done.join(' · ') + '. Bewertungen wurden nicht verändert.', true);
+  importStatus('Importiert: ' + done.join(' · ') + '. Bereits vorhandene Bewertungen wurden nicht verändert.', true);
 }
 
 function renderPhaseButtons(){ renderPhaseBloecke(); }
@@ -1644,7 +1720,7 @@ function collectState() {
   return {
     savedAt: new Date().toISOString(),
     meta, scores, phases: PHASES, log: liveState.log,
-    erwartungen: ERWARTUNGEN, fragen: FRAGEN,
+    erwartungen: ERWARTUNGEN, fragen: FRAGEN, prognose: PROGNOSE,
     manualNote,
     setNote: document.getElementById('setNote') ? document.getElementById('setNote').value : null,
     setPts: document.getElementById('setPts') ? document.getElementById('setPts').value : null,
@@ -1681,6 +1757,7 @@ function restoreState() {
     const el = document.getElementById(id);
     if (el && d.meta[id] !== undefined) el.value = d.meta[id];
   });
+  if (d.prognose && typeof d.prognose === 'object') PROGNOSE = d.prognose;
   if (d.scores) Object.keys(d.scores).forEach(id => {
     const item = allItems().find(c => c.id === id);
     if (!item) return;
@@ -1697,6 +1774,7 @@ function restoreState() {
 
   ['planung','durchfuehrung','reflexion'].forEach(updateBadge);
   updateProgress();
+  renderAllPrognose();
   const when = d.savedAt ? new Date(d.savedAt).toLocaleString('de-DE') : 'unbekannt';
   showSaveStatus('Arbeitsstand vom ' + when + ' wiederhergestellt');
   return true;
